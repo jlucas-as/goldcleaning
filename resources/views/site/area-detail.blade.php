@@ -8,8 +8,8 @@
             <p class="lead">{{ $area['note'] }} Gold Cleaning helps homeowners, renters, apartment residents, condo owners, short-term rental hosts, and move-in/move-out clients request practical cleaning service without a complicated booking process.</p>
             <div class="hero-actions">
                 <a class="btn primary" href="{{ route('site.quote') }}">Get a Fast Quote</a>
-                <a class="btn" data-phone-tel href="tel:+14709829820">Call Now</a>
-                <a class="btn" href="sms:+14709829820">Text Us</a>
+                <a class="btn" data-phone-tel href="tel:+16783303174">Call Now</a>
+                <a class="btn" href="sms:+16783303174">Text Us</a>
             </div>
         </div>
         <div class="card quote-card"><div class="pad"><div style="font-weight:900;font-size:22px">Request a quote in {{ $city }}</div><p class="sub" style="margin-top:6px">Share ZIP code, service type, home size, and timing so we can confirm availability.</p>@include('site.partials.quote-form', ['id' => $slug, 'city' => $city])</div></div>

@@ -18,7 +18,15 @@
     <meta name="twitter:description" content="{{ $meta['description'] }}" />
     <meta name="twitter:image" content="{{ $meta['image'] }}" />
     <link rel="icon" type="image/png" href="{{ url('public/img/favicon.png') }}" />
-    <link rel="stylesheet" href="{{ url('public/css/styles.css') }}?v=20" />
+    <link rel="stylesheet" href="{{ url('public/css/styles.css') }}?v=21" />
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-SDQ77FVZ9D"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-SDQ77FVZ9D');
+    </script>
     @foreach (($meta['schema'] ?? []) as $schema)
         <script type="application/ld+json">{!! json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
     @endforeach
@@ -37,12 +45,13 @@
                 <a href="{{ route('site.service-areas') }}">Service Areas</a>
                 <a href="{{ route('site.quote') }}">Quote</a>
                 <a href="{{ route('site.how-it-works') }}">How It Works</a>
+                <a href="{{ route('site.home') }}#reviews">Reviews</a>
                 <a href="{{ route('site.faq') }}">FAQ</a>
                 <a href="{{ route('site.contact') }}">Contact</a>
             </nav>
 
             <div class="actions">
-                <a class="btn" data-phone-tel href="tel:+14709829820">Call</a>
+                <a class="btn" data-phone-tel href="tel:+16783303174">Call</a>
                 <a class="btn primary" data-wa-quote href="#" target="_blank" rel="noreferrer">Get a Quote</a>
                 <button class="btn burger" type="button" data-burger aria-label="Open menu">Menu</button>
             </div>
@@ -80,6 +89,7 @@
                         <a href="{{ route('site.service-areas') }}">Service Areas</a>
                         <a href="{{ route('site.quote') }}">Quote</a>
                         <a href="{{ route('site.how-it-works') }}">How It Works</a>
+                        <a href="{{ route('site.home') }}#reviews">Google Reviews</a>
                         <a href="{{ route('site.faq') }}">FAQ</a>
                         <a href="{{ route('site.privacy-policy') }}">Privacy Policy</a>
                         <a href="{{ route('site.terms') }}">Terms</a>
@@ -89,9 +99,9 @@
                 <div>
                     <div style="font-weight:900;margin-bottom:8px">Contact</div>
                     <div style="display:grid;gap:6px">
-                        <a data-phone-tel href="tel:+14709829820"><span data-phone-display>(470) 982-9820</span></a>
+                        <a data-phone-tel href="tel:+16783303174"><span data-phone-display>(678) 330-3174</span></a>
                         <a data-email-link href="mailto:hello@goldcleaning.com"><span data-email>hello@goldcleaning.com</span></a>
-                        <a href="sms:+14709829820">Text Us</a>
+                        <a href="sms:+16783303174">Text Us</a>
                         <a data-wa-quote href="#" target="_blank" rel="noreferrer">WhatsApp Quote</a>
                     </div>
                 </div>
@@ -107,7 +117,7 @@
         </script>
     </footer>
 
-    <script src="{{ url('public/js/app.js') }}?v=20"></script>
+    <script src="{{ url('public/js/app.js') }}?v=21"></script>
 </body>
 
 </html>

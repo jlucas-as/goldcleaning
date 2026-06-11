@@ -6,7 +6,7 @@
         </div>
         <div class="field">
             <label for="phone-{{ $id ?? 'main' }}">Phone</label>
-            <input id="phone-{{ $id ?? 'main' }}" name="phone" placeholder="(470) 982-9820" required />
+            <input id="phone-{{ $id ?? 'main' }}" name="phone" placeholder="(678) 330-3174" required />
         </div>
     </div>
 

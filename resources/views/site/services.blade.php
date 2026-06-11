@@ -8,7 +8,7 @@
             <p class="lead">Gold Cleaning serves Marietta and nearby Atlanta suburbs with flexible cleaning for houses, apartments, move-outs, and short-term rentals. Choose a one-time service or request recurring visits.</p>
             <div class="hero-actions">
                 <a class="btn primary" href="{{ route('site.quote') }}">Request a Quote</a>
-                <a class="btn" data-phone-tel href="tel:+14709829820">Call Now</a>
+                <a class="btn" data-phone-tel href="tel:+16783303174">Call Now</a>
             </div>
         </div>
         <div class="card">

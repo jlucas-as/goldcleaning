@@ -311,7 +311,7 @@ class SiteController extends Controller
             '@type' => 'HouseCleaningService',
             'name' => 'Gold Cleaning',
             'url' => $this->baseUrl.'/',
-            'telephone' => '+14709829820',
+            'telephone' => '+16783303174',
             'email' => 'hello@goldcleaning.com',
             'image' => $this->baseUrl.'/public/img/logo.png',
             'priceRange' => '$$',
@@ -328,7 +328,7 @@ class SiteController extends Controller
             'name' => $service['name'].' in Marietta, GA',
             'description' => $service['description'],
             'url' => $this->baseUrl.$path,
-            'provider' => ['@type' => 'HouseCleaningService', 'name' => 'Gold Cleaning', 'telephone' => '+14709829820'],
+            'provider' => ['@type' => 'HouseCleaningService', 'name' => 'Gold Cleaning', 'telephone' => '+16783303174'],
             'areaServed' => ['@type' => 'City', 'name' => 'Marietta, GA'],
         ];
     }
@@ -340,7 +340,7 @@ class SiteController extends Controller
             '@type' => 'Service',
             'name' => 'House Cleaning Services in '.$city.', GA',
             'url' => $this->baseUrl.$path,
-            'provider' => ['@type' => 'HouseCleaningService', 'name' => 'Gold Cleaning', 'telephone' => '+14709829820'],
+            'provider' => ['@type' => 'HouseCleaningService', 'name' => 'Gold Cleaning', 'telephone' => '+16783303174'],
             'areaServed' => ['@type' => 'City', 'name' => $city.', GA'],
         ];
     }

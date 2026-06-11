@@ -8,7 +8,7 @@
             <p class="lead">Gold Cleaning serves homes, apartments, condos, and short-term rentals across the north metro Atlanta area. If your city is not listed, send your ZIP code and we will confirm availability quickly.</p>
             <div class="hero-actions">
                 <a class="btn primary" href="{{ route('site.quote') }}">Get a Fast Quote</a>
-                <a class="btn" data-phone-tel href="tel:+14709829820">Call Now</a>
+                <a class="btn" data-phone-tel href="tel:+16783303174">Call Now</a>
             </div>
             <div class="area-highlights"><span>Cobb County core coverage</span><span>North metro Atlanta routes</span><span>Quote by city or ZIP code</span></div>
         </div>

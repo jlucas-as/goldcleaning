@@ -2,10 +2,10 @@ const BRAND = {
   name: "Gold Cleaning",
   city: "Marietta, GA",
   serviceRadius: "40 miles around Marietta",
-  phoneDisplay: "(470) 982-9820",
-  phoneTel: "+14709829820",
-  phoneDigits: "14709829820",
-  whatsappDigits: "14709829820",
+  phoneDisplay: "(678) 330-3174",
+  phoneTel: "+16783303174",
+  phoneDigits: "16783303174",
+  whatsappDigits: "16783303174",
   email: "hello@goldcleaning.com"
 };
 

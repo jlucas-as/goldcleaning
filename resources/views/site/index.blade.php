@@ -14,7 +14,7 @@
             </p>
             <div class="hero-actions">
                 <a class="btn primary" href="{{ route('site.quote') }}">Get a Fast Quote</a>
-                <a class="btn" data-phone-tel href="tel:+14709829820">Call Now</a>
+                <a class="btn" data-phone-tel href="tel:+16783303174">Call Now</a>
             </div>
             <div class="service-areas-mini">
                 <span class="areas-label">Serving Marietta and nearby communities:</span>
@@ -25,8 +25,8 @@
                 </div>
             </div>
             <div class="contact-shortcuts">
-                <a class="contact-chip" href="tel:+14709829820">Call</a>
-                <a class="contact-chip" href="sms:+14709829820">Text Us</a>
+                <a class="contact-chip" href="tel:+16783303174">Call</a>
+                <a class="contact-chip" href="sms:+16783303174">Text Us</a>
                 <a class="contact-chip" data-wa-quote href="#" target="_blank" rel="noreferrer">WhatsApp</a>
                 <a class="contact-chip" href="mailto:hello@goldcleaning.com">Email</a>
             </div>
@@ -82,6 +82,28 @@
     </div>
 </section>
 
+<section class="section" id="reviews">
+    <div class="google-reviews-panel">
+        <div class="google-reviews-copy">
+            <span class="pill">Google Reviews</span>
+            <h2 class="h2">Customer feedback on Google</h2>
+            <p class="sub">
+                Our Google Business Profile is new and does not have public reviews yet. Visit the official profile
+                to leave the first review or check for the latest customer feedback.
+            </p>
+        </div>
+        <div class="google-reviews-actions">
+            <div class="google-rating">
+                <strong>New profile</strong>
+                <span>Reviews will appear on Google as customers share their experience.</span>
+            </div>
+            <a class="btn primary" href="https://share.google/PYUQBJCVwr6IlvqTv" target="_blank" rel="noopener noreferrer">
+                View Gold Cleaning on Google
+            </a>
+        </div>
+    </div>
+</section>
+
 <section class="section" id="faq">
     <div class="section-heading"><h2 class="h2">Common questions</h2></div>
     <div class="faq-list">
@@ -96,7 +118,7 @@
     <p class="sub">Get a fast quote and availability for Marietta, GA and nearby areas.</p>
     <div class="center-actions">
         <a class="btn primary" href="{{ route('site.quote') }}">Request a Cleaning Quote</a>
-        <a class="btn" data-phone-tel href="tel:+14709829820">Call Gold Cleaning</a>
+        <a class="btn" data-phone-tel href="tel:+16783303174">Call Gold Cleaning</a>
     </div>
 </section>
 @endsection

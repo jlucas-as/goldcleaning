@@ -7,8 +7,8 @@
             <h1>Contact Gold Cleaning in Marietta, GA.</h1>
             <p class="lead">Call, text, WhatsApp, or email Gold Cleaning for residential house cleaning quotes in Marietta, Cobb County, and nearby metro Atlanta cities.</p>
             <div class="contact-shortcuts">
-                <a class="contact-chip" href="tel:+14709829820">Call (470) 982-9820</a>
-                <a class="contact-chip" href="sms:+14709829820">Text Us</a>
+                <a class="contact-chip" href="tel:+16783303174">Call (678) 330-3174</a>
+                <a class="contact-chip" href="sms:+16783303174">Text Us</a>
                 <a class="contact-chip" data-wa-quote href="#" target="_blank" rel="noreferrer">WhatsApp Quote</a>
                 <a class="contact-chip" href="mailto:hello@goldcleaning.com">hello@goldcleaning.com</a>
             </div>

@@ -23,10 +23,12 @@
                 <p>Gold Cleaning may collect contact information, city, ZIP code, home details, service preferences, and notes submitted through forms, text, WhatsApp, phone, or email.</p>
                 <h2>How information is used</h2>
                 <p>Information is used to respond to quote requests, confirm availability, understand service needs, and communicate about cleaning appointments.</p>
+                <h2>Website analytics</h2>
+                <p>This website uses Google Analytics to understand page visits and website usage. Google may process device, browser, approximate location, and interaction data according to its own privacy policies. Visitors can limit analytics tracking through browser and privacy settings.</p>
                 <h2>Sharing</h2>
                 <p>Gold Cleaning does not sell personal information. Information may be shared only as needed to respond to requests, support service communication, or comply with applicable legal obligations.</p>
                 <h2>Contact</h2>
-                <p>For privacy questions, email <a href="mailto:hello@goldcleaning.com">hello@goldcleaning.com</a> or call <a href="tel:+14709829820">(470) 982-9820</a>.</p>
+                <p>For privacy questions, email <a href="mailto:hello@goldcleaning.com">hello@goldcleaning.com</a> or call <a href="tel:+16783303174">(678) 330-3174</a>.</p>
             @endif
         </div>
     </div>

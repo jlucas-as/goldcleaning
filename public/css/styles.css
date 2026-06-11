@@ -1540,8 +1540,57 @@ textarea {
   line-height: 1.7;
 }
 
+.google-reviews-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, .65fr);
+  gap: 28px;
+  align-items: center;
+  padding: 28px;
+  border: 1px solid rgba(23, 32, 51, .10);
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: var(--shadow);
+}
+
+.google-reviews-copy .h2 {
+  margin-top: 14px;
+}
+
+.google-reviews-actions {
+  display: grid;
+  gap: 14px;
+}
+
+.google-rating {
+  display: grid;
+  gap: 5px;
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--surface2);
+  border: 1px solid rgba(23, 32, 51, .08);
+}
+
+.google-rating strong {
+  font-size: 18px;
+}
+
+.google-rating span {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
 @media (max-width: 920px) {
   .form-grid {
     grid-template-columns: 1fr;
+  }
+
+  .google-reviews-panel {
+    grid-template-columns: 1fr;
+    padding: 22px;
+  }
+
+  .google-reviews-actions .btn {
+    width: 100%;
   }
 }
