@@ -27,6 +27,16 @@
         gtag('js', new Date());
         gtag('config', 'G-SDQ77FVZ9D');
     </script>
+    
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-18242560417"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'AW-18242560417');
+    </script>
+
     @foreach (($meta['schema'] ?? []) as $schema)
         <script type="application/ld+json">{!! json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
     @endforeach
