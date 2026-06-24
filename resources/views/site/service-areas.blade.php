@@ -3,9 +3,9 @@
 <section class="section areas-hero">
     <div class="grid grid-2 hero-bottom-grid">
         <div>
-            <span class="pill">Based in Marietta, GA</span>
-            <h1>Cleaning service across Marietta, Cobb County, and nearby Atlanta suburbs.</h1>
-            <p class="lead">Gold Cleaning serves homes, apartments, condos, and short-term rentals across the north metro Atlanta area. If your city is not listed, send your ZIP code and we will confirm availability quickly.</p>
+            <span class="pill">{{ $page['hero_pill'] ?? 'Based in Marietta, GA' }}</span>
+            <h1>{{ $page['hero_h1'] ?? 'Cleaning service across Marietta, Cobb County, and nearby Atlanta suburbs.' }}</h1>
+            <p class="lead">{{ $page['hero_lead'] ?? 'Gold Cleaning serves homes, apartments, condos, and short-term rentals across the north metro Atlanta area. If your city is not listed, send your ZIP code and we will confirm availability quickly.' }}</p>
             <div class="hero-actions">
                 <a class="btn primary" href="{{ route('site.quote') }}">Get a Fast Quote</a>
                 <a class="btn" data-phone-tel href="tel:+16783303174">Call Now</a>
@@ -24,8 +24,8 @@
 
 <section class="section">
     <div class="section-heading">
-        <h2 class="h2">Priority service areas</h2>
-        <p class="sub">Each city page includes local cleaning options, nearby areas, FAQs, and quote links.</p>
+        <h2 class="h2">{{ $page['areas_title'] ?? 'Priority service areas' }}</h2>
+        <p class="sub">{{ $page['areas_text'] ?? 'Each city page includes local cleaning options, nearby areas, FAQs, and quote links.' }}</p>
     </div>
     <div class="area-grid">
         @foreach ($areas as $slug => $area)

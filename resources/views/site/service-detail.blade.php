@@ -9,7 +9,7 @@
             <div class="hero-actions">
                 <a class="btn primary" href="{{ route('site.quote') }}">Get a Fast Quote</a>
                 <a class="btn" data-phone-tel href="tel:+16783303174">Call Now</a>
-                <a class="btn" href="sms:+16783303174">Text Us</a>
+                <a class="btn" href="sms:{{ $settings['phone_digits'] }}">Text Us</a>
             </div>
         </div>
         <div class="card quote-card"><div class="pad"><div style="font-weight:900;font-size:22px">Request {{ $service['name'] }}</div><p class="sub" style="margin-top:6px">Tell us about the home, timing, ZIP code, and priorities.</p>@include('site.partials.quote-form', ['id' => $slug, 'selectedService' => $service['name'], 'city' => 'Marietta'])</div></div>

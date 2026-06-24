@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Painel Admin | Gold Cleaning</title>
+    <style>
+        :root { color-scheme: light; --gold:#b88928; --gold-dark:#8d641d; --ink:#17202a; --muted:#667085; --line:#e4e7ec; --soft:#f6f7f9; --white:#fff; }
+        * { box-sizing: border-box; }
+        body { margin:0; font-family:Arial,sans-serif; background:var(--soft); color:var(--ink); }
+        a { color:inherit; }
+        .shell { min-height:100vh; display:grid; grid-template-columns:260px 1fr; }
+        .sidebar { background:#111827; color:#fff; padding:22px; position:sticky; top:0; height:100vh; }
+        .brand { font-size:20px; font-weight:900; margin-bottom:6px; }
+        .sidebar p { color:#cbd5e1; margin:0 0 22px; line-height:1.45; }
+        .nav { display:grid; gap:8px; }
+        .nav button { border:0; border-radius:8px; background:transparent; color:#e5e7eb; padding:11px 12px; text-align:left; font-weight:700; cursor:pointer; }
+        .nav button.active, .nav button:hover { background:rgba(184,137,40,.18); color:#fff; }
+        .content { min-width:0; }
+        .topbar { background:var(--white); border-bottom:1px solid var(--line); padding:18px 26px; display:flex; align-items:center; justify-content:space-between; gap:16px; position:sticky; top:0; z-index:2; }
+        h1 { margin:0; font-size:24px; }
+        h2 { margin:0 0 14px; font-size:20px; }
+        h3 { margin:0; font-size:16px; }
+        p { color:var(--muted); line-height:1.5; }
+        main { max-width:1180px; margin:0 auto; padding:26px; }
+        .section { display:none; }
+        .section.active { display:block; }
+        .card { background:var(--white); border:1px solid var(--line); border-radius:8px; padding:20px; margin-bottom:18px; }
+        .grid { display:grid; gap:14px; }
+        .grid-2 { grid-template-columns:repeat(2,minmax(0,1fr)); }
+        .grid-3 { grid-template-columns:repeat(3,minmax(0,1fr)); }
+        label { display:block; font-size:13px; font-weight:800; margin-bottom:6px; }
+        input, textarea, select { width:100%; border:1px solid var(--line); border-radius:7px; padding:10px 11px; font:inherit; color:var(--ink); background:#fff; }
+        textarea { min-height:96px; resize:vertical; line-height:1.45; }
+        .large textarea { min-height:150px; }
+        .hint { font-size:12px; color:var(--muted); margin:6px 0 0; }
+        .btn { appearance:none; border:1px solid var(--gold); background:var(--gold); color:#fff; border-radius:7px; padding:11px 16px; font-weight:800; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:8px; }
+        .btn:hover { background:var(--gold-dark); }
+        .btn.secondary { background:#fff; color:var(--ink); border-color:var(--line); }
+        .btn.secondary:hover { background:#f9fafb; }
+        .actions { display:flex; justify-content:flex-end; gap:10px; align-items:center; }
+        .notice { border-radius:8px; padding:12px 14px; margin-bottom:16px; }
+        .success { background:#ecfdf3; color:#027a48; border:1px solid #abefc6; }
+        .error { background:#fef3f2; color:#b42318; border:1px solid #fecdca; }
+        .summary { display:flex; justify-content:space-between; gap:12px; align-items:center; cursor:pointer; }
+        details.card { padding:0; overflow:hidden; }
+        details.card > summary { list-style:none; padding:18px 20px; }
+        details.card > summary::-webkit-details-marker { display:none; }
+        .details-body { border-top:1px solid var(--line); padding:20px; }
+        .pill { display:inline-flex; border-radius:999px; background:#fef7e7; color:#8d641d; padding:5px 10px; font-size:12px; font-weight:900; }
+        .pair-list { display:grid; gap:12px; }
+        .pair-row { display:grid; grid-template-columns:minmax(180px,.75fr) minmax(240px,1fr) auto; gap:10px; align-items:start; padding:12px; border:1px solid var(--line); border-radius:8px; background:#fcfcfd; }
+        .remove-row { border-color:#fecdca; color:#b42318; background:#fff; padding:10px 12px; }
+        .subtle { color:var(--muted); font-size:13px; margin:0; }
+        .savebar { position:sticky; bottom:0; border-top:1px solid var(--line); background:rgba(255,255,255,.96); padding:14px 26px; display:flex; justify-content:space-between; gap:14px; align-items:center; }
+        @media (max-width:980px) { .shell { grid-template-columns:1fr; } .sidebar { position:static; height:auto; } .nav { grid-template-columns:repeat(2,minmax(0,1fr)); } .grid-2,.grid-3 { grid-template-columns:1fr; } .pair-row { grid-template-columns:1fr; } .topbar,.savebar { position:static; } }
+    </style>
+</head>
+<body>
+    <form method="post" action="{{ url('/admin') }}" class="shell">
+        <aside class="sidebar">
+            <div class="brand">{{ $settings['brand'] ?? 'Gold Cleaning' }}</div>
+            <p>Painel de conteudo do site. Edite os campos e clique em salvar.</p>
+            <nav class="nav" aria-label="Navegacao do admin">
+                <button type="button" class="active" data-tab-button="settings">Configuracoes</button>
+                <button type="button" data-tab-button="pages">Paginas</button>
+                <button type="button" data-tab-button="services">Servicos</button>
+                <button type="button" data-tab-button="areas">Areas</button>
+                <button type="button" data-tab-button="faqs">FAQs</button>
+            </nav>
+        </aside>
+
+        <div class="content">
+            <header class="topbar">
+                <div>
+                    <h1>Painel Admin</h1>
+                    <p class="subtle">Edicao visual do conteudo salvo em {{ $path }}.</p>
+                </div>
+                <div class="actions">
+                    <a class="btn secondary" href="{{ url('/') }}" target="_blank" rel="noreferrer">Ver site</a>
+                    <button class="btn" type="submit">Salvar alteracoes</button>
+                </div>
+            </header>
+
+            <main>
+                @if ($saved)
+                    <div class="notice success">Conteudo salvo com sucesso.</div>
+                @endif
+
+                @if ($error)
+                    <div class="notice error">{{ $error }}</div>
+                @endif
+
+                <section class="section active" data-tab="settings">
+                    <div class="card">
+                        <h2>Configuracoes globais</h2>
+                        <div class="grid grid-3">
+                            <div><label>Nome da marca</label><input name="settings[brand]" value="{{ $settings['brand'] ?? '' }}"></div>
+                            <div><label>Cidade principal</label><input name="settings[city]" value="{{ $settings['city'] ?? '' }}"></div>
+                            <div><label>Raio de atendimento</label><input name="settings[service_radius]" value="{{ $settings['service_radius'] ?? '' }}"></div>
+                            <div><label>Telefone exibido</label><input name="settings[phone_display]" value="{{ $settings['phone_display'] ?? '' }}"></div>
+                            <div><label>Telefone para link</label><input name="settings[phone_tel]" value="{{ $settings['phone_tel'] ?? '' }}"></div>
+                            <div><label>Digitos para SMS</label><input name="settings[phone_digits]" value="{{ $settings['phone_digits'] ?? '' }}"></div>
+                            <div><label>WhatsApp</label><input name="settings[whatsapp_digits]" value="{{ $settings['whatsapp_digits'] ?? '' }}"></div>
+                            <div><label>Email</label><input name="settings[email]" value="{{ $settings['email'] ?? '' }}"></div>
+                            <div><label>URL base</label><input name="settings[base_url]" value="{{ $settings['base_url'] ?? '' }}"></div>
+                            <div><label>Google Analytics ID</label><input name="settings[google_analytics_id]" value="{{ $settings['google_analytics_id'] ?? '' }}"></div>
+                            <div><label>Google Ads ID</label><input name="settings[google_ads_id]" value="{{ $settings['google_ads_id'] ?? '' }}"></div>
+                            <div><label>Imagem social</label><input name="settings[image]" value="{{ $settings['image'] ?? '' }}"></div>
+                        </div>
+                    </div>
+                    <div class="card large">
+                        <h2>Rodape</h2>
+                        <label>Descricao do rodape</label>
+                        <textarea name="settings[footer_description]">{{ $settings['footer_description'] ?? '' }}</textarea>
+                    </div>
+                </section>
+
+                <section class="section" data-tab="pages">
+                    @foreach ($pages as $pageKey => $page)
+                        <details class="card" @if ($loop->first) open @endif>
+                            <summary class="summary">
+                                <div>
+                                    <h2>{{ $pageLabels[$pageKey] ?? $pageKey }}</h2>
+                                    <p class="subtle">{{ $page['title'] ?? '' }}</p>
+                                </div>
+                                <span class="pill">Editar pagina</span>
+                            </summary>
+                            <div class="details-body grid">
+                                <div class="grid grid-2">
+                                    <div><label>Meta title</label><input name="pages[{{ $pageKey }}][title]" value="{{ $page['title'] ?? '' }}"></div>
+                                    <div><label>Meta description</label><input name="pages[{{ $pageKey }}][description]" value="{{ $page['description'] ?? '' }}"></div>
+                                </div>
+                                @foreach ($page as $field => $value)
+                                    @continue(in_array($field, ['title', 'description', 'sections'], true) || is_array($value))
+                                    <div>
+                                        <label>{{ ucwords(str_replace('_', ' ', $field)) }}</label>
+                                        <textarea name="pages[{{ $pageKey }}][{{ $field }}]">{{ $value }}</textarea>
+                                    </div>
+                                @endforeach
+                                @if (isset($page['sections']))
+                                    <div>
+                                        <label>Secoes</label>
+                                        <div class="pair-list" data-repeater>
+                                            @foreach ($page['sections'] as $section)
+                                                <div class="pair-row">
+                                                    <input name="pages[{{ $pageKey }}][sections][{{ $loop->index }}][title]" value="{{ $section[0] ?? '' }}" placeholder="Titulo">
+                                                    <textarea name="pages[{{ $pageKey }}][sections][{{ $loop->index }}][text]" placeholder="Texto">{{ $section[1] ?? '' }}</textarea>
+                                                    <button type="button" class="btn secondary remove-row" data-remove-row>Remover</button>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                        <button type="button" class="btn secondary" data-add-row data-prefix="pages[{{ $pageKey }}][sections]" data-first="title" data-second="text">Adicionar secao</button>
+                                    </div>
+                                @endif
+                            </div>
+                        </details>
+                    @endforeach
+                </section>
+
+                <section class="section" data-tab="services">
+                    @foreach ($services as $slug => $service)
+                        <details class="card" @if ($loop->first) open @endif>
+                            <summary class="summary">
+                                <div>
+                                    <h2>{{ $service['name'] ?? $slug }}</h2>
+                                    <p class="subtle">/services/{{ $slug }}</p>
+                                </div>
+                                <span class="pill">Servico</span>
+                            </summary>
+                            <div class="details-body grid">
+                                <div class="grid grid-2">
+                                    <div><label>Nome</label><input name="services[{{ $slug }}][name]" value="{{ $service['name'] ?? '' }}"></div>
+                                    <div><label>Meta title</label><input name="services[{{ $slug }}][title]" value="{{ $service['title'] ?? '' }}"></div>
+                                </div>
+                                <div><label>Meta description</label><textarea name="services[{{ $slug }}][description]">{{ $service['description'] ?? '' }}</textarea></div>
+                                <div><label>Introducao</label><textarea name="services[{{ $slug }}][intro]">{{ $service['intro'] ?? '' }}</textarea></div>
+                                <div class="grid grid-2">
+                                    <div><label>Para quem e</label><textarea name="services[{{ $slug }}][for]">{{ implode("\n", $service['for'] ?? []) }}</textarea><p class="hint">Uma linha por item.</p></div>
+                                    <div><label>O que inclui</label><textarea name="services[{{ $slug }}][included]">{{ implode("\n", $service['included'] ?? []) }}</textarea><p class="hint">Uma linha por item.</p></div>
+                                    <div><label>Afeta o orcamento</label><textarea name="services[{{ $slug }}][quote]">{{ implode("\n", $service['quote'] ?? []) }}</textarea><p class="hint">Uma linha por item.</p></div>
+                                    <div><label>Add-ons populares</label><textarea name="services[{{ $slug }}][addons]">{{ implode("\n", $service['addons'] ?? []) }}</textarea><p class="hint">Uma linha por item.</p></div>
+                                </div>
+                            </div>
+                        </details>
+                    @endforeach
+                </section>
+
+                <section class="section" data-tab="areas">
+                    @foreach ($areas as $slug => $area)
+                        <details class="card" @if ($loop->first) open @endif>
+                            <summary class="summary">
+                                <div>
+                                    <h2>{{ $area['city'] ?? $slug }}, GA</h2>
+                                    <p class="subtle">/service-areas/{{ $slug }}</p>
+                                </div>
+                                <span class="pill">Area</span>
+                            </summary>
+                            <div class="details-body grid">
+                                <div><label>Cidade</label><input name="areas[{{ $slug }}][city]" value="{{ $area['city'] ?? '' }}"></div>
+                                <div><label>Texto da pagina</label><textarea name="areas[{{ $slug }}][note]">{{ $area['note'] ?? '' }}</textarea></div>
+                                <div><label>Cidades proximas</label><textarea name="areas[{{ $slug }}][nearby]">{{ implode("\n", $area['nearby'] ?? []) }}</textarea><p class="hint">Uma cidade por linha.</p></div>
+                            </div>
+                        </details>
+                    @endforeach
+                </section>
+
+                <section class="section" data-tab="faqs">
+                    @foreach ($faqs as $faqKey => $items)
+                        <div class="card">
+                            <div class="summary" style="margin-bottom:14px">
+                                <div>
+                                    <h2>{{ $faqKey === 'home' ? 'FAQ da Home' : 'Pagina completa de FAQ' }}</h2>
+                                    <p class="subtle">Perguntas exibidas no site e usadas no schema SEO.</p>
+                                </div>
+                                <button type="button" class="btn secondary" data-add-row data-prefix="faqs[{{ $faqKey }}]" data-first="question" data-second="answer">Adicionar pergunta</button>
+                            </div>
+                            <div class="pair-list" data-repeater>
+                                @foreach ($items as $item)
+                                    <div class="pair-row">
+                                        <input name="faqs[{{ $faqKey }}][{{ $loop->index }}][question]" value="{{ $item[0] ?? '' }}" placeholder="Pergunta">
+                                        <textarea name="faqs[{{ $faqKey }}][{{ $loop->index }}][answer]" placeholder="Resposta">{{ $item[1] ?? '' }}</textarea>
+                                        <button type="button" class="btn secondary remove-row" data-remove-row>Remover</button>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endforeach
+                </section>
+            </main>
+
+            <div class="savebar">
+                <p class="subtle">As alteracoes entram no site assim que forem salvas.</p>
+                <button class="btn" type="submit">Salvar alteracoes</button>
+            </div>
+        </div>
+    </form>
+
+    <script>
+        document.querySelectorAll("[data-tab-button]").forEach((button) => {
+            button.addEventListener("click", () => {
+                document.querySelectorAll("[data-tab-button]").forEach((item) => item.classList.remove("active"));
+                document.querySelectorAll("[data-tab]").forEach((section) => section.classList.remove("active"));
+                button.classList.add("active");
+                document.querySelector(`[data-tab="${button.dataset.tabButton}"]`).classList.add("active");
+            });
+        });
+
+        document.addEventListener("click", (event) => {
+            const addButton = event.target.closest("[data-add-row]");
+            const removeButton = event.target.closest("[data-remove-row]");
+
+            if (removeButton) {
+                removeButton.closest(".pair-row").remove();
+                return;
+            }
+
+            if (!addButton) return;
+
+            const list = addButton.parentElement.querySelector("[data-repeater]") || addButton.closest(".card").querySelector("[data-repeater]");
+            const index = list.querySelectorAll(".pair-row").length;
+            const prefix = addButton.dataset.prefix;
+            const first = addButton.dataset.first;
+            const second = addButton.dataset.second;
+            const row = document.createElement("div");
+
+            row.className = "pair-row";
+            row.innerHTML = `
+                <input name="${prefix}[${index}][${first}]" placeholder="${first === "question" ? "Pergunta" : "Titulo"}">
+                <textarea name="${prefix}[${index}][${second}]" placeholder="${second === "answer" ? "Resposta" : "Texto"}"></textarea>
+                <button type="button" class="btn secondary remove-row" data-remove-row>Remover</button>
+            `;
+            list.appendChild(row);
+        });
+    </script>
+</body>
+</html>

@@ -19,23 +19,25 @@
     <meta name="twitter:image" content="{{ $meta['image'] }}" />
     <link rel="icon" type="image/png" href="{{ url('public/img/favicon.png') }}" />
     <link rel="stylesheet" href="{{ url('public/css/styles.css') }}?v=21" />
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-SDQ77FVZ9D"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-SDQ77FVZ9D');
-    </script>
+    @if (!empty($settings['google_analytics_id']))
+        <script async src="https://www.googletagmanager.com/gtag/js?id={{ $settings['google_analytics_id'] }}"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '{{ $settings['google_analytics_id'] }}');
+        </script>
+    @endif
     
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-18242560417"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'AW-18242560417');
-    </script>
+    @if (!empty($settings['google_ads_id']))
+        <script async src="https://www.googletagmanager.com/gtag/js?id={{ $settings['google_ads_id'] }}"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '{{ $settings['google_ads_id'] }}');
+        </script>
+    @endif
 
     @foreach (($meta['schema'] ?? []) as $schema)
         <script type="application/ld+json">{!! json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
@@ -61,7 +63,7 @@
             </nav>
 
             <div class="actions">
-                <a class="btn" data-phone-tel href="tel:+16783303174">Call</a>
+                <a class="btn" data-phone-tel href="tel:{{ $settings['phone_tel'] }}">Call</a>
                 <a class="btn primary" data-wa-quote href="#" target="_blank" rel="noreferrer">Get a Quote</a>
                 <button class="btn burger" type="button" data-burger aria-label="Open menu">Menu</button>
             </div>
@@ -88,7 +90,7 @@
                 <div>
                     <div style="font-weight:900;font-size:16px" data-brand>Gold Cleaning</div>
                     <p style="margin:10px 0 0;max-width:60ch">
-                        Professional residential cleaning in Marietta, GA and nearby Atlanta suburbs. Call, text, or WhatsApp for a quote.
+                        {{ $settings['footer_description'] ?? 'Professional residential cleaning in Marietta, GA and nearby Atlanta suburbs. Call, text, or WhatsApp for a quote.' }}
                     </p>
                 </div>
 
@@ -109,9 +111,9 @@
                 <div>
                     <div style="font-weight:900;margin-bottom:8px">Contact</div>
                     <div style="display:grid;gap:6px">
-                        <a data-phone-tel href="tel:+16783303174"><span data-phone-display>(678) 330-3174</span></a>
-                        <a data-email-link href="mailto:hello@goldcleaning.com"><span data-email>hello@goldcleaning.com</span></a>
-                        <a href="sms:+16783303174">Text Us</a>
+                        <a data-phone-tel href="tel:{{ $settings['phone_tel'] }}"><span data-phone-display>{{ $settings['phone_display'] }}</span></a>
+                        <a data-email-link href="mailto:{{ $settings['email'] }}"><span data-email>{{ $settings['email'] }}</span></a>
+                        <a href="sms:{{ $settings['phone_digits'] }}">Text Us</a>
                         <a data-wa-quote href="#" target="_blank" rel="noreferrer">WhatsApp Quote</a>
                     </div>
                 </div>
@@ -127,7 +129,19 @@
         </script>
     </footer>
 
-    <script src="{{ url('public/js/app.js') }}?v=21"></script>
+    <script>
+        window.GOLD_CLEANING_BRAND = {!! json_encode([
+            'name' => $settings['brand'],
+            'city' => $settings['city'],
+            'serviceRadius' => $settings['service_radius'],
+            'phoneDisplay' => $settings['phone_display'],
+            'phoneTel' => $settings['phone_tel'],
+            'phoneDigits' => $settings['phone_digits'],
+            'whatsappDigits' => $settings['whatsapp_digits'],
+            'email' => $settings['email'],
+        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!};
+    </script>
+    <script src="{{ url('public/js/app.js') }}?v=22"></script>
 </body>
 
 </html>

@@ -7,10 +7,10 @@
 <section class="hero-content section" id="quote">
     <div class="grid grid-2 hero-bottom-grid">
         <div class="hero-copy-block">
-            <span class="pill">Locally focused cleaning for Marietta, GA homes</span>
-            <h1>Reliable house cleaning for busy homes in Marietta, GA.</h1>
+            <span class="pill">{{ $page['hero_pill'] ?? 'Locally focused cleaning for Marietta, GA homes' }}</span>
+            <h1>{{ $page['hero_h1'] ?? 'Reliable house cleaning for busy homes in Marietta, GA.' }}</h1>
             <p class="lead">
-                Gold Cleaning helps homeowners, renters, apartment residents, and short-term rental hosts keep their spaces guest-ready, family-ready, and easier to live in. Request a one-time clean or set up recurring service around your routine.
+                {{ $page['hero_lead'] ?? 'Gold Cleaning helps homeowners, renters, apartment residents, and short-term rental hosts keep their spaces guest-ready, family-ready, and easier to live in. Request a one-time clean or set up recurring service around your routine.' }}
             </p>
             <div class="hero-actions">
                 <a class="btn primary" href="{{ route('site.quote') }}">Get a Fast Quote</a>
@@ -34,8 +34,8 @@
 
         <div class="card quote-card">
             <div class="pad">
-                <div style="font-weight:900;font-size:22px">Request a Cleaning Quote</div>
-                <p class="sub" style="margin-top:6px">Share the basics and we will follow up with availability and a clear estimate.</p>
+                <div style="font-weight:900;font-size:22px">{{ $page['quote_card_title'] ?? 'Request a Cleaning Quote' }}</div>
+                <p class="sub" style="margin-top:6px">{{ $page['quote_card_text'] ?? 'Share the basics and we will follow up with availability and a clear estimate.' }}</p>
                 @include('site.partials.quote-form', ['id' => 'home'])
             </div>
         </div>
@@ -44,8 +44,8 @@
 
 <section class="section" id="services">
     <div class="section-heading">
-        <h2 class="h2">Cleaning services for real life in metro Atlanta</h2>
-        <p class="sub">Choose the service that fits your home, timing, and priorities. Each quote is based on home size, condition, access, ZIP code, and requested add-ons.</p>
+        <h2 class="h2">{{ $page['services_title'] ?? 'Cleaning services for real life in metro Atlanta' }}</h2>
+        <p class="sub">{{ $page['services_text'] ?? 'Choose the service that fits your home, timing, and priorities. Each quote is based on home size, condition, access, ZIP code, and requested add-ons.' }}</p>
     </div>
     <div class="grid grid-3">
         @foreach ($services as $slug => $service)
@@ -107,7 +107,7 @@
 <section class="section" id="faq">
     <div class="section-heading"><h2 class="h2">Common questions</h2></div>
     <div class="faq-list">
-        @foreach ([['Do you serve areas outside Marietta?', 'Yes. Gold Cleaning serves Marietta and nearby communities including Smyrna, Kennesaw, Acworth, Woodstock, Roswell, Sandy Springs, East Cobb, Vinings, and more.'], ['Can I request a one-time clean?', 'Yes. You can request standard cleaning, deep cleaning, move-in/move-out cleaning, or Airbnb turnover without committing to recurring service.'], ['How do I get pricing?', 'Send the quote form with your home size, ZIP code, service type, and notes. We will follow up with an estimate based on the details you provide.'], ['Can I text instead of calling?', 'Yes. You can request your quote by WhatsApp or text message, and choose your preferred contact method in the form.']] as $item)
+        @foreach ($homeFaq as $item)
             <details><summary>{{ $item[0] }}</summary><p>{{ $item[1] }}</p></details>
         @endforeach
     </div>

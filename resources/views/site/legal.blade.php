@@ -28,7 +28,7 @@
                 <h2>Sharing</h2>
                 <p>Gold Cleaning does not sell personal information. Information may be shared only as needed to respond to requests, support service communication, or comply with applicable legal obligations.</p>
                 <h2>Contact</h2>
-                <p>For privacy questions, email <a href="mailto:hello@goldcleaning.com">hello@goldcleaning.com</a> or call <a href="tel:+16783303174">(678) 330-3174</a>.</p>
+                <p>For privacy questions, email <a data-email-link href="mailto:{{ $settings['email'] }}">{{ $settings['email'] }}</a> or call <a data-phone-tel href="tel:{{ $settings['phone_tel'] }}">{{ $settings['phone_display'] }}</a>.</p>
             @endif
         </div>
     </div>

@@ -3,10 +3,10 @@
 <section class="section">
     <div class="grid grid-2 hero-bottom-grid">
         <div>
-            <span class="pill">Fast local quote</span>
-            <h1>Request a house cleaning quote in Marietta, GA.</h1>
-            <p class="lead">Tell us what you need, where the home is located, and how you prefer to be contacted. If there is no backend configured, this form opens WhatsApp or SMS with your details already prepared.</p>
-            <div class="hero-actions"><a class="btn" href="tel:+16783303174">Call Now</a><a class="btn" href="sms:+16783303174">Text Us</a><a class="btn primary" data-wa-quote href="#" target="_blank" rel="noreferrer">WhatsApp Quote</a></div>
+            <span class="pill">{{ $page['hero_pill'] ?? 'Fast local quote' }}</span>
+            <h1>{{ $page['hero_h1'] ?? 'Request a house cleaning quote in Marietta, GA.' }}</h1>
+            <p class="lead">{{ $page['hero_lead'] ?? 'Tell us what you need, where the home is located, and how you prefer to be contacted. If there is no backend configured, this form opens WhatsApp or SMS with your details already prepared.' }}</p>
+            <div class="hero-actions"><a class="btn" data-phone-tel href="tel:{{ $settings['phone_tel'] }}">Call Now</a><a class="btn" href="sms:{{ $settings['phone_digits'] }}">Text Us</a><a class="btn primary" data-wa-quote href="#" target="_blank" rel="noreferrer">WhatsApp Quote</a></div>
         </div>
         <div class="card quote-card"><div class="pad"><div style="font-weight:900;font-size:22px">Cleaning quote details</div>@include('site.partials.quote-form', ['id' => 'quote'])</div></div>
     </div>

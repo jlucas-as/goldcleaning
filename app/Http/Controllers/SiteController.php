@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\SiteContentRepository;
 use Illuminate\Http\Response;
 
 class SiteController extends Controller
 {
     private string $baseUrl = 'https://goldcleaning.net/v2';
+    private SiteContentRepository $content;
 
     private array $services = [
         'standard-cleaning' => [
@@ -97,23 +99,43 @@ class SiteController extends Controller
         'douglasville-ga' => ['city' => 'Douglasville', 'nearby' => ['Austell', 'Powder Springs', 'Dallas', 'Lithia Springs'], 'note' => 'Douglasville is best quoted with ZIP code, property size, service type, and preferred cleaning window.'],
     ];
 
+    public function __construct()
+    {
+        $this->content = new SiteContentRepository();
+        $settings = $this->content->settings();
+
+        $this->baseUrl = rtrim($settings['base_url'] ?? $this->baseUrl, '/');
+        $this->services = $this->content->services($this->services);
+        $this->areas = $this->content->areas($this->areas);
+    }
+
     public function index()
     {
-        return view('site.index', $this->viewData([
+        $page = $this->content->page('home', [
             'title' => 'House Cleaning Services in Marietta, GA | Gold Cleaning',
             'description' => 'Gold Cleaning provides residential cleaning in Marietta, GA and nearby Atlanta suburbs. Standard, deep, move-in/move-out, Airbnb, and recurring service.',
+        ]);
+
+        return view('site.index', $this->viewData([
+            'title' => $page['title'],
+            'description' => $page['description'],
             'path' => '/',
             'schema' => [$this->businessSchema(), $this->faqSchema($this->homeFaq())],
-        ]));
+        ], array_merge(compact('page'), ['homeFaq' => $this->homeFaq()])));
     }
 
     public function services()
     {
-        return view('site.services', $this->viewData([
+        $page = $this->content->page('services', [
             'title' => 'Residential Cleaning Services in Marietta, GA | Gold Cleaning',
             'description' => 'Explore Gold Cleaning services in Marietta, GA including standard, recurring, deep, move-in/move-out, Airbnb turnover, apartment, and condo cleaning.',
+        ]);
+
+        return view('site.services', $this->viewData([
+            'title' => $page['title'],
+            'description' => $page['description'],
             'path' => '/services',
-        ]));
+        ], compact('page')));
     }
 
     public function service(string $slug)
@@ -134,11 +156,16 @@ class SiteController extends Controller
 
     public function serviceAreas()
     {
-        return view('site.service-areas', $this->viewData([
+        $page = $this->content->page('service_areas', [
             'title' => 'Service Areas for House Cleaning Near Marietta, GA | Gold Cleaning',
             'description' => 'Gold Cleaning serves Marietta, Smyrna, Kennesaw, Acworth, Powder Springs, Vinings, Woodstock, Roswell, Sandy Springs, Alpharetta, and nearby cities.',
+        ]);
+
+        return view('site.service-areas', $this->viewData([
+            'title' => $page['title'],
+            'description' => $page['description'],
             'path' => '/service-areas',
-        ]));
+        ], compact('page')));
     }
 
     public function serviceArea(string $slug)
@@ -160,29 +187,38 @@ class SiteController extends Controller
 
     public function quote()
     {
-        return view('site.quote', $this->viewData([
+        $page = $this->content->page('quote', [
             'title' => 'Request a House Cleaning Quote in Marietta, GA | Gold Cleaning',
             'description' => 'Request a fast cleaning quote from Gold Cleaning for homes, apartments, move-outs, deep cleans, recurring service, and Airbnb turnovers near Marietta, GA.',
+        ]);
+
+        return view('site.quote', $this->viewData([
+            'title' => $page['title'],
+            'description' => $page['description'],
             'path' => '/quote',
-        ]));
+        ], compact('page')));
     }
 
     public function contact()
     {
-        return view('site.contact', $this->viewData([
+        $page = $this->content->page('contact', [
             'title' => 'Contact Gold Cleaning in Marietta, GA',
             'description' => 'Call, text, WhatsApp, or email Gold Cleaning for residential cleaning quotes in Marietta, Cobb County, and nearby metro Atlanta cities.',
+        ]);
+
+        return view('site.contact', $this->viewData([
+            'title' => $page['title'],
+            'description' => $page['description'],
             'path' => '/contact',
             'schema' => [$this->businessSchema()],
-        ]));
+        ], compact('page')));
     }
 
     public function howItWorks()
     {
-        return view('site.simple', $this->viewData([
+        $page = $this->content->page('how_it_works', [
             'title' => 'How Gold Cleaning Works | Marietta House Cleaning',
             'description' => 'Learn how to request a quote, confirm availability, prepare for your cleaning, and choose the right house cleaning service in Marietta, GA.',
-            'path' => '/how-it-works',
             'h1' => 'How Gold Cleaning works',
             'intro' => 'A clear cleaning process helps your first visit feel simple and keeps expectations aligned from quote to follow-up.',
             'sections' => [
@@ -191,17 +227,29 @@ class SiteController extends Controller
                 ['Walk through priorities', 'Before the clean, we align on supplies, parking, access, surfaces, add-ons, and the rooms that matter most.'],
                 ['Choose next steps', 'Book one-time service or move into weekly, bi-weekly, or monthly recurring cleaning after the first visit.'],
             ],
-        ]));
+        ]);
+
+        return view('site.simple', $this->viewData(array_merge($page, [
+            'path' => '/how-it-works',
+        ])));
     }
 
     public function faq()
     {
-        return view('site.faq', $this->viewData([
+        $page = $this->content->page('faq', [
             'title' => 'House Cleaning FAQ | Gold Cleaning Marietta, GA',
             'description' => 'Answers to common questions about Gold Cleaning services, quotes, service areas, deep cleaning, recurring cleaning, move-outs, and Airbnb turnovers.',
+        ]);
+
+        return view('site.faq', $this->viewData([
+            'title' => $page['title'],
+            'description' => $page['description'],
             'path' => '/faq',
             'schema' => [$this->faqSchema($this->homeFaq())],
-        ]));
+        ], array_merge(compact('page'), ['faqItems' => $this->content->faq('full', array_merge($this->homeFaq(), [
+            ['Do you bring supplies?', 'Share your preference when requesting a quote. If your home needs specific products for stone, wood, stainless steel, or sensitive surfaces, include that in the notes.'],
+            ['Can I book recurring service after a first clean?', 'Yes. Many homes start with a deep clean and then move to weekly, bi-weekly, or monthly maintenance.'],
+        ]))])));
     }
 
     public function privacy()
@@ -259,28 +307,48 @@ class SiteController extends Controller
     {
         $path = $meta['path'] ?? '/';
         $canonical = $path === '/' ? $this->baseUrl.'/' : $this->baseUrl.rtrim($path, '/');
+        $settings = $this->settings();
 
         return array_merge([
             'meta' => array_merge([
                 'robots' => 'index,follow',
                 'canonical' => $canonical,
-                'image' => $this->baseUrl.'/public/img/hero-team.png',
+                'image' => $settings['image'] ?? $this->baseUrl.'/public/img/hero-team.png',
                 'schema' => [],
             ], $meta),
             'services' => $this->services,
             'areas' => $this->areas,
             'baseUrl' => $this->baseUrl,
+            'settings' => $settings,
         ], $meta, $extra);
+    }
+
+    private function settings(): array
+    {
+        return array_merge([
+            'brand' => 'Gold Cleaning',
+            'city' => 'Marietta, GA',
+            'service_radius' => '40 miles around Marietta',
+            'phone_display' => '(678) 330-3174',
+            'phone_tel' => '+16783303174',
+            'phone_digits' => '16783303174',
+            'whatsapp_digits' => '16783303174',
+            'email' => 'hello@goldcleaning.com',
+            'base_url' => $this->baseUrl,
+            'image' => $this->baseUrl.'/public/img/hero-team.png',
+            'google_analytics_id' => 'G-SDQ77FVZ9D',
+            'google_ads_id' => 'AW-18242560417',
+        ], $this->content->settings());
     }
 
     private function homeFaq(): array
     {
-        return [
+        return $this->content->faq('home', [
             ['Do you serve areas outside Marietta?', 'Yes. Gold Cleaning serves Marietta and nearby communities including Smyrna, Kennesaw, Acworth, Woodstock, Roswell, Sandy Springs, East Cobb, Vinings, and more.'],
             ['Can I request a one-time clean?', 'Yes. You can request standard cleaning, deep cleaning, move-in/move-out cleaning, or Airbnb turnover without committing to recurring service.'],
             ['How do I get pricing?', 'Send the quote form with your home size, ZIP code, service type, and notes. We will follow up with an estimate based on the details you provide.'],
             ['Can I text instead of calling?', 'Yes. You can request your quote by WhatsApp or text message, and choose your preferred contact method in the form.'],
-        ];
+        ]);
     }
 
     private function serviceFaq(string $service): array
@@ -306,13 +374,15 @@ class SiteController extends Controller
 
     private function businessSchema(): array
     {
+        $settings = $this->settings();
+
         return [
             '@context' => 'https://schema.org',
             '@type' => 'HouseCleaningService',
-            'name' => 'Gold Cleaning',
+            'name' => $settings['brand'],
             'url' => $this->baseUrl.'/',
-            'telephone' => '+16783303174',
-            'email' => 'hello@goldcleaning.com',
+            'telephone' => $settings['phone_tel'],
+            'email' => $settings['email'],
             'image' => $this->baseUrl.'/public/img/logo.png',
             'priceRange' => '$$',
             'areaServed' => array_values(array_map(fn ($area) => ['@type' => 'City', 'name' => $area['city'].', GA'], $this->areas)),
@@ -322,25 +392,29 @@ class SiteController extends Controller
 
     private function serviceSchema(array $service, string $path): array
     {
+        $settings = $this->settings();
+
         return [
             '@context' => 'https://schema.org',
             '@type' => 'Service',
             'name' => $service['name'].' in Marietta, GA',
             'description' => $service['description'],
             'url' => $this->baseUrl.$path,
-            'provider' => ['@type' => 'HouseCleaningService', 'name' => 'Gold Cleaning', 'telephone' => '+16783303174'],
+            'provider' => ['@type' => 'HouseCleaningService', 'name' => $settings['brand'], 'telephone' => $settings['phone_tel']],
             'areaServed' => ['@type' => 'City', 'name' => 'Marietta, GA'],
         ];
     }
 
     private function areaSchema(string $city, string $path): array
     {
+        $settings = $this->settings();
+
         return [
             '@context' => 'https://schema.org',
             '@type' => 'Service',
             'name' => 'House Cleaning Services in '.$city.', GA',
             'url' => $this->baseUrl.$path,
-            'provider' => ['@type' => 'HouseCleaningService', 'name' => 'Gold Cleaning', 'telephone' => '+16783303174'],
+            'provider' => ['@type' => 'HouseCleaningService', 'name' => $settings['brand'], 'telephone' => $settings['phone_tel']],
             'areaServed' => ['@type' => 'City', 'name' => $city.', GA'],
         ];
     }

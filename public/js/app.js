@@ -1,4 +1,4 @@
-const BRAND = {
+const BRAND = window.GOLD_CLEANING_BRAND || {
   name: "Gold Cleaning",
   city: "Marietta, GA",
   serviceRadius: "40 miles around Marietta",

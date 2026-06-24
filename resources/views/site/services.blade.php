@@ -3,9 +3,9 @@
 <section class="section services-hero">
     <div class="grid grid-2 hero-bottom-grid">
         <div>
-            <span class="pill">Residential cleaning services in Marietta, GA</span>
-            <h1>Cleaning options built around your home, schedule, and priorities.</h1>
-            <p class="lead">Gold Cleaning serves Marietta and nearby Atlanta suburbs with flexible cleaning for houses, apartments, move-outs, and short-term rentals. Choose a one-time service or request recurring visits.</p>
+            <span class="pill">{{ $page['hero_pill'] ?? 'Residential cleaning services in Marietta, GA' }}</span>
+            <h1>{{ $page['hero_h1'] ?? 'Cleaning options built around your home, schedule, and priorities.' }}</h1>
+            <p class="lead">{{ $page['hero_lead'] ?? 'Gold Cleaning serves Marietta and nearby Atlanta suburbs with flexible cleaning for houses, apartments, move-outs, and short-term rentals. Choose a one-time service or request recurring visits.' }}</p>
             <div class="hero-actions">
                 <a class="btn primary" href="{{ route('site.quote') }}">Request a Quote</a>
                 <a class="btn" data-phone-tel href="tel:+16783303174">Call Now</a>
@@ -13,8 +13,8 @@
         </div>
         <div class="card">
             <div class="pad service-summary">
-                <h2>What affects your quote?</h2>
-                <p class="sub">Every home is different. The most accurate estimate comes from a few practical details.</p>
+                <h2>{{ $page['quote_factors_title'] ?? 'What affects your quote?' }}</h2>
+                <p class="sub">{{ $page['quote_factors_text'] ?? 'Every home is different. The most accurate estimate comes from a few practical details.' }}</p>
                 <ul>
                     <li>Home size, bedrooms, and bathrooms</li>
                     <li>Current condition and last deep clean</li>
@@ -30,8 +30,8 @@
 
 <section class="section">
     <div class="section-heading">
-        <h2 class="h2">Services</h2>
-        <p class="sub">Start with the service that best matches your situation. You can add notes for rooms, surfaces, pets, access instructions, or anything that needs extra attention.</p>
+        <h2 class="h2">{{ $page['services_title'] ?? 'Services' }}</h2>
+        <p class="sub">{{ $page['services_text'] ?? 'Start with the service that best matches your situation. You can add notes for rooms, surfaces, pets, access instructions, or anything that needs extra attention.' }}</p>
     </div>
     <div class="grid grid-3">
         @foreach ($services as $slug => $service)

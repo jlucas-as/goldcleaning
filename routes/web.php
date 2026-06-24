@@ -18,3 +18,6 @@ $router->group(['as' => 'site'], function () use ($router) {
     $router->get('/sitemap.xml', ['as' => 'sitemap', 'uses' => 'SiteController@sitemap']);
     $router->get('/robots.txt', ['as' => 'robots', 'uses' => 'SiteController@robots']);
 });
+
+$router->get('/admin', ['as' => 'admin.content', 'uses' => 'AdminController@edit']);
+$router->post('/admin', ['as' => 'admin.content.update', 'uses' => 'AdminController@update']);

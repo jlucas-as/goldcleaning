@@ -1,4 +1,4 @@
-<form data-quote-form action="mailto:hello@goldcleaning.com" method="post" enctype="text/plain" style="margin-top:14px">
+<form data-quote-form action="mailto:{{ $settings['email'] ?? 'hello@goldcleaning.com' }}" method="post" enctype="text/plain" style="margin-top:14px">
     <div class="grid form-grid">
         <div class="field">
             <label for="name-{{ $id ?? 'main' }}">Name</label>
