@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Support\SiteContentRepository;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class SiteController extends Controller
@@ -120,6 +121,7 @@ class SiteController extends Controller
             'title' => $page['title'],
             'description' => $page['description'],
             'path' => '/',
+            'landing' => true,
             'schema' => [$this->businessSchema(), $this->faqSchema($this->homeFaq())],
         ], array_merge(compact('page'), ['homeFaq' => $this->homeFaq()])));
     }
@@ -197,6 +199,48 @@ class SiteController extends Controller
             'description' => $page['description'],
             'path' => '/quote',
         ], compact('page')));
+    }
+
+    public function quoteSubmit(Request $request)
+    {
+        if (trim((string) $request->input('company_website', '')) !== '') {
+            return redirect(route('site.thank-you'));
+        }
+
+        $lead = [
+            'created_at' => date('c'),
+            'name' => trim((string) $request->input('name', '')),
+            'phone' => trim((string) $request->input('phone', '')),
+            'zip' => trim((string) $request->input('zip', '')),
+            'service' => trim((string) $request->input('service', '')),
+            'source' => trim((string) $request->input('source', 'landing_page')),
+            'gclid' => trim((string) $request->input('gclid', '')),
+            'utm_source' => trim((string) $request->input('utm_source', '')),
+            'utm_medium' => trim((string) $request->input('utm_medium', '')),
+            'utm_campaign' => trim((string) $request->input('utm_campaign', '')),
+            'utm_adgroup' => trim((string) $request->input('utm_adgroup', '')),
+            'utm_term' => trim((string) $request->input('utm_term', '')),
+            'page_url' => trim((string) $request->input('page_url', '')),
+            'user_agent' => $request->header('User-Agent'),
+            'ip' => $request->ip(),
+        ];
+
+        if ($lead['name'] === '' || $lead['phone'] === '' || $lead['zip'] === '') {
+            return redirect(route('site.home').'#quote');
+        }
+
+        $dir = storage_path('app');
+        if (!is_dir($dir)) {
+            mkdir($dir, 0775, true);
+        }
+
+        file_put_contents(
+            $dir.DIRECTORY_SEPARATOR.'quote-leads.jsonl',
+            json_encode($lead, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE).PHP_EOL,
+            FILE_APPEND | LOCK_EX
+        );
+
+        return redirect(route('site.thank-you').'?lead=quote');
     }
 
     public function contact()
@@ -344,10 +388,14 @@ class SiteController extends Controller
     private function homeFaq(): array
     {
         return $this->content->faq('home', [
-            ['Do you serve areas outside Marietta?', 'Yes. Gold Cleaning serves Marietta and nearby communities including Smyrna, Kennesaw, Acworth, Woodstock, Roswell, Sandy Springs, East Cobb, Vinings, and more.'],
-            ['Can I request a one-time clean?', 'Yes. You can request standard cleaning, deep cleaning, move-in/move-out cleaning, or Airbnb turnover without committing to recurring service.'],
             ['How do I get pricing?', 'Send the quote form with your home size, ZIP code, service type, and notes. We will follow up with an estimate based on the details you provide.'],
-            ['Can I text instead of calling?', 'Yes. You can request your quote by WhatsApp or text message, and choose your preferred contact method in the form.'],
+            ['Do you offer one-time cleaning?', 'Yes. You can request standard cleaning, deep cleaning or move-in and move-out cleaning without committing to recurring service.'],
+            ['Can I schedule recurring cleaning?', 'Yes. Recurring cleaning may be scheduled weekly, bi-weekly or monthly, depending on availability.'],
+            ['Do you bring cleaning supplies?', 'Tell us your preference when requesting your quote. Please mention any special products required for stone, wood, stainless steel or sensitive surfaces.'],
+            ['Do I need to be home?', 'Access arrangements can be discussed before the appointment. Include gate, parking, pet or entry instructions when confirming the service.'],
+            ['Do you clean homes with pets?', 'Tell us about your pets and any extra pet hair or access considerations when requesting the quote.'],
+            ['What areas do you serve?', 'Gold Cleaning serves Marietta and nearby communities across Cobb County and the north Metro Atlanta area. Send your ZIP Code to confirm availability.'],
+            ['How soon will I receive a response?', 'Send your request by form, phone or text. Our team will contact you to discuss availability and the information needed for your estimate.'],
         ]);
     }
 

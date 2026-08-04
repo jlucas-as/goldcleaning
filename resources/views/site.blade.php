@@ -2,6 +2,14 @@
 <html lang="en">
 
 <head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-WR22F9RM');</script>
+    <!-- End Google Tag Manager -->
+
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>{{ $meta['title'] }}</title>
@@ -18,7 +26,7 @@
     <meta name="twitter:description" content="{{ $meta['description'] }}" />
     <meta name="twitter:image" content="{{ $meta['image'] }}" />
     <link rel="icon" type="image/png" href="{{ url('public/img/favicon.png') }}" />
-    <link rel="stylesheet" href="{{ url('public/css/styles.css') }}?v=21" />
+    <link rel="stylesheet" href="{{ url('public/css/styles.css') }}?v=30" />
     @if (!empty($settings['google_analytics_id']))
         <script async src="https://www.googletagmanager.com/gtag/js?id={{ $settings['google_analytics_id'] }}"></script>
         <script>
@@ -44,8 +52,13 @@
     @endforeach
 </head>
 
-<body>
-    <header class="nav">
+<body class="{{ !empty($meta['landing']) ? 'landing-page' : '' }}">
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WR22F9RM"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    
+    <header class="nav" style="display:none">
         <div class="nav-inner">
             <a class="brand" href="{{ route('site.home') }}" aria-label="Gold Cleaning home">
                 <img src="{{ url('public/img/logo.png') }}" alt="Gold Cleaning logo" class="logo-img" width="220" height="52">
@@ -69,8 +82,30 @@
             </div>
         </div>
     </header>
+    
+    <header class="lp-header">
+        <div class="lp-topbar">
+            <div class="lp-shell">Serving Marietta, GA and nearby communities</div>
+        </div>
+        <div class="lp-nav lp-shell">
+            <a class="brand" href="{{ route('site.home') }}" aria-label="Gold Cleaning home">
+                <img src="{{ url('public/img/logo.png') }}" alt="Gold Cleaning logo" class="logo-img" width="220" height="52">
+            </a>
+            <nav class="menu" data-menu aria-label="Main navigation">
+                <a href="{{ route('site.home') }}">Home</a>
+                <a href="{{ route('site.services') }}">Services</a>
+                <a href="{{ route('site.service-areas') }}">Service Areas</a>
+                <a href="{{ route('site.quote') }}">Quote</a>
+                <a href="{{ route('site.how-it-works') }}">How It Works</a>
+                <a href="{{ route('site.home') }}#reviews">Reviews</a>
+                <a href="{{ route('site.faq') }}">FAQ</a>
+                <a href="{{ route('site.contact') }}">Contact</a>
+            </nav>
+            <a class="btn primary lp-call-top" data-track-call data-phone-tel href="tel:{{ $settings['phone_tel'] }}">Call {{ $settings['phone_display'] }}</a>
+        </div>
+    </header>
 
-    <main class="container">
+    <main class="{{ !empty($meta['landing']) ? 'lp-main' : 'container' }}">
         @if (!empty($breadcrumbs))
             <nav class="breadcrumbs" aria-label="Breadcrumb">
                 <a href="{{ route('site.home') }}">Home</a>
@@ -84,7 +119,7 @@
         @yield('main')
     </main>
 
-    <footer class="footer">
+    <footer class="footer {{ !empty($meta['landing']) ? 'lp-footer' : '' }}">
         <div class="container">
             <div class="footer-grid">
                 <div>
@@ -141,7 +176,15 @@
             'email' => $settings['email'],
         ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!};
     </script>
-    <script src="{{ url('public/js/app.js') }}?v=22"></script>
+    @if (!empty($meta['landing']))
+        <div class="lp-mobile-bar" aria-label="Quick contact actions">
+            <a data-track-call data-phone-tel href="tel:{{ $settings['phone_tel'] }}">Call</a>
+            <a data-track-sms href="sms:{{ $settings['phone_digits'] }}">Text</a>
+            <a href="#quote">Get Quote</a>
+        </div>
+    @endif
+
+    <script src="{{ url('public/js/app.js') }}?v=30"></script>
 </body>
 
 </html>

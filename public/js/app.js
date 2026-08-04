@@ -132,11 +132,58 @@ function bindQuoteButtons() {
   });
 }
 
+function trackLeadAction(action) {
+  if (typeof window.gtag === "function") {
+    window.gtag("event", action, {
+      event_category: "lead",
+      event_label: "ads_landing_page"
+    });
+  }
+}
+
+function bindLeadTracking() {
+  const params = new URLSearchParams(window.location.search);
+  const keys = ["gclid", "utm_source", "utm_medium", "utm_campaign", "utm_adgroup", "utm_term"];
+
+  document.querySelectorAll("[data-campaign-field]").forEach((field) => {
+    const key = field.getAttribute("data-campaign-field");
+    field.value = params.get(key) || localStorage.getItem(`gc_${key}`) || "";
+  });
+
+  keys.forEach((key) => {
+    const value = params.get(key);
+    if (value) localStorage.setItem(`gc_${key}`, value);
+  });
+
+  document.querySelectorAll("[data-page-url]").forEach((field) => {
+    field.value = window.location.href;
+  });
+
+  document.querySelectorAll("[data-track-call]").forEach((el) => {
+    el.addEventListener("click", () => trackLeadAction("phone_call_click"));
+  });
+
+  document.querySelectorAll("[data-track-sms]").forEach((el) => {
+    el.addEventListener("click", () => trackLeadAction("sms_click"));
+  });
+
+  document.querySelectorAll("[data-wa-quote]").forEach((el) => {
+    el.addEventListener("click", () => trackLeadAction("whatsapp_click"));
+  });
+
+  document.querySelectorAll("[data-lead-form]").forEach((form) => {
+    form.addEventListener("submit", () => {
+      trackLeadAction("quote_form_submit");
+    });
+  });
+}
+
 document.addEventListener("DOMContentLoaded", function () {
   try {
     setBrand();
     mobileMenu();
     bindQuoteButtons();
+    bindLeadTracking();
   } catch (error) {
     console.error("Gold Cleaning JS error:", error);
   }

@@ -9,6 +9,7 @@ $router->group(['as' => 'site'], function () use ($router) {
     $router->get('/service-areas', ['as' => 'service-areas', 'uses' => 'SiteController@serviceAreas']);
     $router->get('/service-areas/{slug}', ['as' => 'service-area', 'uses' => 'SiteController@serviceArea']);
     $router->get('/quote', ['as' => 'quote', 'uses' => 'SiteController@quote']);
+    $router->post('/quote-submit', ['as' => 'quote-submit', 'uses' => 'SiteController@quoteSubmit']);
     $router->get('/contact', ['as' => 'contact', 'uses' => 'SiteController@contact']);
     $router->get('/how-it-works', ['as' => 'how-it-works', 'uses' => 'SiteController@howItWorks']);
     $router->get('/faq', ['as' => 'faq', 'uses' => 'SiteController@faq']);
