@@ -48,6 +48,7 @@ class AdminController extends Controller
             'faqs' => $this->cleanFaqs((array) $request->input('faqs', [])),
             'services' => $this->cleanServices((array) $request->input('services', [])),
             'areas' => $this->cleanAreas((array) $request->input('areas', [])),
+            'before_after' => $this->cleanBeforeAfter((array) $request->input('before_after', []), (array) $request->file('before_after', [])),
         ]);
 
         return redirect('/admin?saved=1');
@@ -63,9 +64,23 @@ class AdminController extends Controller
             'faqs' => $this->faqs(),
             'services' => $this->siteProperty($site, 'services'),
             'areas' => $this->siteProperty($site, 'areas'),
+            'beforeAfter' => $this->beforeAfter(),
             'pageLabels' => $this->pageLabels,
             'path' => $this->content->path(),
         ];
+    }
+
+    private function beforeAfter(): array
+    {
+        return array_replace_recursive([
+            'section' => [
+                'enabled' => '1',
+                'eyebrow' => 'Before and after',
+                'title' => 'See the Difference',
+                'text' => 'Real cleaning results from homes served by Gold Cleaning.',
+            ],
+            'items' => [],
+        ], $this->content->get('before_after', []));
     }
 
     private function pages(): array
@@ -226,6 +241,72 @@ class AdminController extends Controller
         }
 
         return $areas;
+    }
+
+    private function cleanBeforeAfter(array $input, array $files): array
+    {
+        $items = [];
+
+        foreach ((array) ($input['items'] ?? []) as $index => $item) {
+            $item = $this->cleanScalarArray((array) $item);
+
+            $beforeImage = $item['before_image_existing'] ?? '';
+            $afterImage = $item['after_image_existing'] ?? '';
+            $video = $item['video_existing'] ?? '';
+            $itemFiles = (array) ($files['items'][$index] ?? []);
+
+            if (!empty($itemFiles['before_image'])) {
+                $beforeImage = $this->storeUpload($itemFiles['before_image'], ['jpg', 'jpeg', 'png', 'webp', 'gif']);
+            }
+
+            if (!empty($itemFiles['after_image'])) {
+                $afterImage = $this->storeUpload($itemFiles['after_image'], ['jpg', 'jpeg', 'png', 'webp', 'gif']);
+            }
+
+            if (!empty($itemFiles['video'])) {
+                $video = $this->storeUpload($itemFiles['video'], ['mp4', 'webm', 'mov']);
+            }
+
+            unset($item['before_image_existing'], $item['after_image_existing'], $item['video_existing']);
+
+            $item['before_image'] = $beforeImage;
+            $item['after_image'] = $afterImage;
+            $item['video'] = $video;
+            $item['enabled'] = !empty($item['enabled']) ? '1' : '0';
+
+            if (($item['title'] ?? '') !== '' || $beforeImage !== '' || $afterImage !== '' || $video !== '') {
+                $items[] = $item;
+            }
+        }
+
+        return [
+            'section' => $this->cleanScalarArray((array) ($input['section'] ?? [])),
+            'items' => $items,
+        ];
+    }
+
+    private function storeUpload(mixed $file, array $allowedExtensions): string
+    {
+        if (!is_object($file) || !method_exists($file, 'isValid') || !$file->isValid()) {
+            return '';
+        }
+
+        $extension = strtolower((string) $file->getClientOriginalExtension());
+
+        if (!in_array($extension, $allowedExtensions, true)) {
+            return '';
+        }
+
+        $directory = dirname(__DIR__, 3).'/public/uploads/before-after';
+
+        if (!is_dir($directory)) {
+            mkdir($directory, 0775, true);
+        }
+
+        $name = date('Ymd-His').'-'.bin2hex(random_bytes(4)).'.'.$extension;
+        $file->move($directory, $name);
+
+        return 'public/uploads/before-after/'.$name;
     }
 
     private function cleanScalarArray(array $items): array

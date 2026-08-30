@@ -26,7 +26,7 @@
     <meta name="twitter:description" content="{{ $meta['description'] }}" />
     <meta name="twitter:image" content="{{ $meta['image'] }}" />
     <link rel="icon" type="image/png" href="{{ url('public/img/favicon.png') }}" />
-    <link rel="stylesheet" href="{{ url('public/css/styles.css') }}?v=30" />
+    <link rel="stylesheet" href="{{ url('public/css/styles.css') }}?v=31" />
     @if (!empty($settings['google_analytics_id']))
         <script async src="https://www.googletagmanager.com/gtag/js?id={{ $settings['google_analytics_id'] }}"></script>
         <script>
@@ -184,7 +184,7 @@
         </div>
     @endif
 
-    <script src="{{ url('public/js/app.js') }}?v=30"></script>
+    <script src="{{ url('public/js/app.js') }}?v=31"></script>
 </body>
 
 </html>

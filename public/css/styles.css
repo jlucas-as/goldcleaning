@@ -1958,6 +1958,77 @@ textarea {
   gap: 34px;
 }
 
+.lp-before-grid.real-results {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+}
+
+.lp-result-card {
+  overflow: hidden;
+  border: 1px solid var(--lp-line);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 12px 24px rgba(37, 28, 15, .09);
+}
+
+.lp-result-media {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--lp-line);
+}
+
+.lp-result-media figure {
+  position: relative;
+  height: 190px;
+  margin: 0;
+  overflow: hidden;
+  background: #eee;
+}
+
+.lp-result-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lp-result-media span {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  padding: 5px 8px;
+  border-radius: 5px;
+  background: rgba(17, 17, 17, .86);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.lp-result-copy {
+  padding: 16px;
+}
+
+.lp-result-copy h3 {
+  margin: 0 0 7px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 20px;
+}
+
+.lp-result-copy p {
+  margin: 0;
+  color: #453d34;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.lp-result-video {
+  width: calc(100% - 32px);
+  margin: 0 16px 16px;
+  display: block;
+  border-radius: 8px;
+  background: #111;
+}
+
 .lp-before-card {
   position: relative;
   height: 160px;
@@ -2256,6 +2327,14 @@ textarea {
     grid-template-columns: 1fr;
   }
 
+  .lp-before-grid.real-results {
+    grid-template-columns: 1fr;
+  }
+
+  .lp-result-media figure {
+    height: 170px;
+  }
+
   .lp-hero h1 {
     font-size: 34px;
   }
@@ -2318,5 +2397,88 @@ textarea {
 
   .landing-page {
     padding-bottom: 48px;
+  }
+}
+
+/* Landing page mobile form fix */
+@media (max-width: 720px) {
+  .lp-hero {
+    background-image:
+      linear-gradient(180deg, rgba(255,255,255,.92) 0%, rgba(255,255,255,.82) 48%, rgba(255,255,255,.95) 100%),
+      url('../img/hero-clean.webp');
+    background-position: center top;
+  }
+
+  .lp-hero-grid {
+    min-height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 18px;
+    padding-top: 22px;
+    padding-bottom: 26px;
+  }
+
+  .lp-hero-copy {
+    width: 100%;
+    padding: 18px;
+    border: 1px solid rgba(36, 29, 20, .10);
+    border-radius: 10px;
+    background: rgba(255,255,255,.72);
+    backdrop-filter: blur(3px);
+  }
+
+  .lp-hero h1 {
+    max-width: 100%;
+    font-size: clamp(34px, 11vw, 46px);
+    line-height: 1.02;
+  }
+
+  .lp-hero p {
+    max-width: 100%;
+    color: #2d2924;
+    font-size: 16px;
+  }
+
+  .lp-checks {
+    margin: 18px 0;
+  }
+
+  .lp-checks li {
+    color: #17130e;
+  }
+
+  .lp-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .lp-quote-card {
+    width: 100%;
+    margin: 0;
+    padding: 20px;
+    background: rgba(255,255,255,.94);
+    backdrop-filter: blur(4px);
+  }
+
+  .lp-quote-card h2 {
+    font-size: 30px;
+    line-height: 1.08;
+  }
+
+  .lp-quote-card p {
+    font-size: 15px;
+  }
+
+  .lp-short-form input,
+  .lp-short-form select {
+    min-height: 48px;
+    font-size: 16px;
+    background: #fff !important;
+  }
+
+  .lp-short-form .btn {
+    min-height: 50px;
   }
 }

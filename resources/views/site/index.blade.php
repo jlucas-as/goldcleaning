@@ -123,24 +123,51 @@
     </div>
 </section>
 
-<section class="lp-section">
-    <div class="lp-shell">
-        <div class="lp-section-head">
-            <h2>See the Difference</h2>
+@if (($beforeAfter['section']['enabled'] ?? '1') === '1' && !empty($beforeAfter['items']))
+    <section class="lp-section">
+        <div class="lp-shell">
+            <div class="lp-section-head">
+                <span class="lp-eyebrow">{{ $beforeAfter['section']['eyebrow'] ?? 'Before and after' }}</span>
+                <h2>{{ $beforeAfter['section']['title'] ?? 'See the Difference' }}</h2>
+                @if (!empty($beforeAfter['section']['text']))
+                    <p>{{ $beforeAfter['section']['text'] }}</p>
+                @endif
+            </div>
+            <div class="lp-before-grid real-results">
+                @foreach ($beforeAfter['items'] as $item)
+                    @continue(($item['enabled'] ?? '1') !== '1')
+                    <article class="lp-result-card">
+                        <div class="lp-result-media">
+                            @if (!empty($item['before_image']))
+                                <figure>
+                                    <img src="{{ url($item['before_image']) }}" alt="Before {{ $item['title'] ?? 'cleaning service' }}">
+                                    <span>Before</span>
+                                </figure>
+                            @endif
+                            @if (!empty($item['after_image']))
+                                <figure>
+                                    <img src="{{ url($item['after_image']) }}" alt="After {{ $item['title'] ?? 'cleaning service' }}">
+                                    <span>After</span>
+                                </figure>
+                            @endif
+                        </div>
+                        <div class="lp-result-copy">
+                            @if (!empty($item['title']))
+                                <h3>{{ $item['title'] }}</h3>
+                            @endif
+                            @if (!empty($item['description']))
+                                <p>{{ $item['description'] }}</p>
+                            @endif
+                        </div>
+                        @if (!empty($item['video']))
+                            <video class="lp-result-video" src="{{ url($item['video']) }}" controls preload="metadata"></video>
+                        @endif
+                    </article>
+                @endforeach
+            </div>
         </div>
-        <div class="lp-before-grid">
-            @foreach (['Kitchen reset', 'Bathroom detail', 'Living area refresh'] as $item)
-                <figure class="lp-before-card">
-                    <img src="{{ url('public/img/hero-team.png') }}" alt="{{ $item }}">
-                    <div class="lp-split"></div>
-                    <span class="before">Before</span>
-                    <span class="after">After</span>
-                </figure>
-            @endforeach
-        </div>
-        <p class="lp-caption">Photos for visual illustration of service results. Replace with real before-and-after photos when available.</p>
-    </div>
-</section>
+    </section>
+@endif
 
 <section class="lp-section">
     <div class="lp-shell">

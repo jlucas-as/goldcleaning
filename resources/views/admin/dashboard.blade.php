@@ -50,6 +50,10 @@
         .pill { display:inline-flex; border-radius:999px; background:#fef7e7; color:#8d641d; padding:5px 10px; font-size:12px; font-weight:900; }
         .pair-list { display:grid; gap:12px; }
         .pair-row { display:grid; grid-template-columns:minmax(180px,.75fr) minmax(240px,1fr) auto; gap:10px; align-items:start; padding:12px; border:1px solid var(--line); border-radius:8px; background:#fcfcfd; }
+        .media-list { display:grid; gap:16px; }
+        .media-item { display:grid; gap:14px; padding:16px; border:1px solid var(--line); border-radius:8px; background:#fcfcfd; }
+        .media-head { display:flex; justify-content:space-between; gap:12px; align-items:center; }
+        .media-preview { width:100%; height:135px; object-fit:cover; border-radius:8px; border:1px solid var(--line); background:#eef2f6; margin-bottom:8px; }
         .remove-row { border-color:#fecdca; color:#b42318; background:#fff; padding:10px 12px; }
         .subtle { color:var(--muted); font-size:13px; margin:0; }
         .savebar { position:sticky; bottom:0; border-top:1px solid var(--line); background:rgba(255,255,255,.96); padding:14px 26px; display:flex; justify-content:space-between; gap:14px; align-items:center; }
@@ -57,7 +61,7 @@
     </style>
 </head>
 <body>
-    <form method="post" action="{{ url('/admin') }}" class="shell">
+    <form method="post" action="{{ url('/admin') }}" class="shell" enctype="multipart/form-data">
         <aside class="sidebar">
             <div class="brand">{{ $settings['brand'] ?? 'Gold Cleaning' }}</div>
             <p>Painel de conteudo do site. Edite os campos e clique em salvar.</p>
@@ -67,6 +71,7 @@
                 <button type="button" data-tab-button="services">Servicos</button>
                 <button type="button" data-tab-button="areas">Areas</button>
                 <button type="button" data-tab-button="faqs">FAQs</button>
+                <button type="button" data-tab-button="before-after">Antes e Depois</button>
             </nav>
         </aside>
 
@@ -227,6 +232,86 @@
                         </div>
                     @endforeach
                 </section>
+
+                <section class="section" data-tab="before-after">
+                    <div class="card">
+                        <h2>Secao antes e depois</h2>
+                        <div class="grid grid-2">
+                            <div>
+                                <label>Status</label>
+                                <select name="before_after[section][enabled]">
+                                    <option value="1" @if (($beforeAfter['section']['enabled'] ?? '1') === '1') selected @endif>Visivel no site</option>
+                                    <option value="0" @if (($beforeAfter['section']['enabled'] ?? '1') === '0') selected @endif>Oculta</option>
+                                </select>
+                            </div>
+                            <div><label>Etiqueta</label><input name="before_after[section][eyebrow]" value="{{ $beforeAfter['section']['eyebrow'] ?? '' }}"></div>
+                            <div><label>Titulo</label><input name="before_after[section][title]" value="{{ $beforeAfter['section']['title'] ?? '' }}"></div>
+                            <div><label>Texto de apoio</label><input name="before_after[section][text]" value="{{ $beforeAfter['section']['text'] ?? '' }}"></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="summary" style="margin-bottom:14px">
+                            <div>
+                                <h2>Fotos e videos</h2>
+                                <p class="subtle">Cadastre pares de foto antes/depois. O video e opcional.</p>
+                            </div>
+                            <button type="button" class="btn secondary" data-add-media>Adicionar item</button>
+                        </div>
+
+                        <div class="media-list" data-media-list>
+                            @foreach ($beforeAfter['items'] as $item)
+                                <div class="media-item">
+                                    <div class="media-head">
+                                        <strong>{{ $item['title'] ?? 'Resultado' }}</strong>
+                                        <button type="button" class="btn secondary remove-row" data-remove-row>Remover</button>
+                                    </div>
+                                    <div class="grid grid-2">
+                                        <div>
+                                            <label>Titulo</label>
+                                            <input name="before_after[items][{{ $loop->index }}][title]" value="{{ $item['title'] ?? '' }}" placeholder="Ex: Kitchen deep clean">
+                                        </div>
+                                        <div>
+                                            <label>Status</label>
+                                            <select name="before_after[items][{{ $loop->index }}][enabled]">
+                                                <option value="1" @if (($item['enabled'] ?? '1') === '1') selected @endif>Visivel</option>
+                                                <option value="0" @if (($item['enabled'] ?? '1') === '0') selected @endif>Oculto</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <label>Descricao</label>
+                                    <textarea name="before_after[items][{{ $loop->index }}][description]" placeholder="Pequena descricao do resultado">{{ $item['description'] ?? '' }}</textarea>
+                                    <div class="grid grid-3">
+                                        <div>
+                                            <label>Foto antes</label>
+                                            @if (!empty($item['before_image']))
+                                                <img class="media-preview" src="{{ url($item['before_image']) }}" alt="">
+                                            @endif
+                                            <input type="hidden" name="before_after[items][{{ $loop->index }}][before_image_existing]" value="{{ $item['before_image'] ?? '' }}">
+                                            <input type="file" name="before_after[items][{{ $loop->index }}][before_image]" accept="image/*">
+                                        </div>
+                                        <div>
+                                            <label>Foto depois</label>
+                                            @if (!empty($item['after_image']))
+                                                <img class="media-preview" src="{{ url($item['after_image']) }}" alt="">
+                                            @endif
+                                            <input type="hidden" name="before_after[items][{{ $loop->index }}][after_image_existing]" value="{{ $item['after_image'] ?? '' }}">
+                                            <input type="file" name="before_after[items][{{ $loop->index }}][after_image]" accept="image/*">
+                                        </div>
+                                        <div>
+                                            <label>Video opcional</label>
+                                            @if (!empty($item['video']))
+                                                <video class="media-preview" src="{{ url($item['video']) }}" controls></video>
+                                            @endif
+                                            <input type="hidden" name="before_after[items][{{ $loop->index }}][video_existing]" value="{{ $item['video'] ?? '' }}">
+                                            <input type="file" name="before_after[items][{{ $loop->index }}][video]" accept="video/mp4,video/webm,video/quicktime">
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </section>
             </main>
 
             <div class="savebar">
@@ -251,7 +336,8 @@
             const removeButton = event.target.closest("[data-remove-row]");
 
             if (removeButton) {
-                removeButton.closest(".pair-row").remove();
+                const row = removeButton.closest(".pair-row") || removeButton.closest(".media-item");
+                if (row) row.remove();
                 return;
             }
 
@@ -271,6 +357,53 @@
                 <button type="button" class="btn secondary remove-row" data-remove-row>Remover</button>
             `;
             list.appendChild(row);
+        });
+
+        document.querySelector("[data-add-media]")?.addEventListener("click", () => {
+            const list = document.querySelector("[data-media-list]");
+            const index = list.querySelectorAll(".media-item").length;
+            const item = document.createElement("div");
+
+            item.className = "media-item";
+            item.innerHTML = `
+                <div class="media-head">
+                    <strong>Novo resultado</strong>
+                    <button type="button" class="btn secondary remove-row" data-remove-row>Remover</button>
+                </div>
+                <div class="grid grid-2">
+                    <div>
+                        <label>Titulo</label>
+                        <input name="before_after[items][${index}][title]" placeholder="Ex: Kitchen deep clean">
+                    </div>
+                    <div>
+                        <label>Status</label>
+                        <select name="before_after[items][${index}][enabled]">
+                            <option value="1" selected>Visivel</option>
+                            <option value="0">Oculto</option>
+                        </select>
+                    </div>
+                </div>
+                <label>Descricao</label>
+                <textarea name="before_after[items][${index}][description]" placeholder="Pequena descricao do resultado"></textarea>
+                <div class="grid grid-3">
+                    <div>
+                        <label>Foto antes</label>
+                        <input type="hidden" name="before_after[items][${index}][before_image_existing]" value="">
+                        <input type="file" name="before_after[items][${index}][before_image]" accept="image/*">
+                    </div>
+                    <div>
+                        <label>Foto depois</label>
+                        <input type="hidden" name="before_after[items][${index}][after_image_existing]" value="">
+                        <input type="file" name="before_after[items][${index}][after_image]" accept="image/*">
+                    </div>
+                    <div>
+                        <label>Video opcional</label>
+                        <input type="hidden" name="before_after[items][${index}][video_existing]" value="">
+                        <input type="file" name="before_after[items][${index}][video]" accept="video/mp4,video/webm,video/quicktime">
+                    </div>
+                </div>
+            `;
+            list.appendChild(item);
         });
     </script>
 </body>

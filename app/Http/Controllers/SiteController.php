@@ -123,7 +123,10 @@ class SiteController extends Controller
             'path' => '/',
             'landing' => true,
             'schema' => [$this->businessSchema(), $this->faqSchema($this->homeFaq())],
-        ], array_merge(compact('page'), ['homeFaq' => $this->homeFaq()])));
+        ], array_merge(compact('page'), [
+            'homeFaq' => $this->homeFaq(),
+            'beforeAfter' => $this->beforeAfter(),
+        ])));
     }
 
     public function services()
@@ -137,6 +140,7 @@ class SiteController extends Controller
             'title' => $page['title'],
             'description' => $page['description'],
             'path' => '/services',
+            'landing' => true,
         ], compact('page')));
     }
 
@@ -383,6 +387,19 @@ class SiteController extends Controller
             'google_analytics_id' => 'G-SDQ77FVZ9D',
             'google_ads_id' => 'AW-18242560417',
         ], $this->content->settings());
+    }
+
+    private function beforeAfter(): array
+    {
+        return array_replace_recursive([
+            'section' => [
+                'enabled' => '1',
+                'eyebrow' => 'Before and after',
+                'title' => 'See the Difference',
+                'text' => 'Real cleaning results from homes served by Gold Cleaning.',
+            ],
+            'items' => [],
+        ], $this->content->get('before_after', []));
     }
 
     private function homeFaq(): array
