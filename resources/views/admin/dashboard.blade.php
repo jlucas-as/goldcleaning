@@ -14,8 +14,9 @@
         .brand { font-size:20px; font-weight:900; margin-bottom:6px; }
         .sidebar p { color:#cbd5e1; margin:0 0 22px; line-height:1.45; }
         .nav { display:grid; gap:8px; }
-        .nav button { border:0; border-radius:8px; background:transparent; color:#e5e7eb; padding:11px 12px; text-align:left; font-weight:700; cursor:pointer; }
+        .nav button { border:0; border-radius:8px; background:transparent; color:#e5e7eb; padding:11px 12px; display:flex; align-items:center; justify-content:space-between; gap:10px; text-align:left; font-weight:700; cursor:pointer; }
         .nav button.active, .nav button:hover { background:rgba(184,137,40,.18); color:#fff; }
+        .nav-count { min-width:24px; padding:3px 7px; border-radius:999px; background:var(--gold); color:#fff; font-size:11px; text-align:center; }
         .content { min-width:0; }
         .topbar { background:var(--white); border-bottom:1px solid var(--line); padding:18px 26px; display:flex; align-items:center; justify-content:space-between; gap:16px; position:sticky; top:0; z-index:2; }
         h1 { margin:0; font-size:24px; }
@@ -39,6 +40,7 @@
         .btn.secondary { background:#fff; color:var(--ink); border-color:var(--line); }
         .btn.secondary:hover { background:#f9fafb; }
         .actions { display:flex; justify-content:flex-end; gap:10px; align-items:center; }
+        .logout-btn { color:#b42318; }
         .notice { border-radius:8px; padding:12px 14px; margin-bottom:16px; }
         .success { background:#ecfdf3; color:#027a48; border:1px solid #abefc6; }
         .error { background:#fef3f2; color:#b42318; border:1px solid #fecdca; }
@@ -56,17 +58,47 @@
         .media-preview { width:100%; height:135px; object-fit:cover; border-radius:8px; border:1px solid var(--line); background:#eef2f6; margin-bottom:8px; }
         .remove-row { border-color:#fecdca; color:#b42318; background:#fff; padding:10px 12px; }
         .subtle { color:var(--muted); font-size:13px; margin:0; }
+        .section-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; margin-bottom:18px; }
+        .section-heading h2 { margin-bottom:5px; font-size:24px; }
+        .lead-stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin-bottom:18px; }
+        .lead-stat { padding:18px 20px; border:1px solid var(--line); border-radius:8px; background:#fff; }
+        .lead-stat strong { display:block; margin-bottom:4px; font-size:29px; line-height:1; }
+        .lead-stat span { color:var(--muted); font-size:13px; font-weight:700; }
+        .lead-list { display:grid; gap:14px; }
+        .lead-card { padding:0; overflow:hidden; }
+        .lead-card-head { display:flex; align-items:center; justify-content:space-between; gap:18px; padding:18px 20px; border-bottom:1px solid var(--line); }
+        .lead-person { display:flex; align-items:center; gap:12px; min-width:0; }
+        .lead-avatar { width:42px; height:42px; flex:0 0 42px; display:grid; place-items:center; border-radius:50%; background:#fef7e7; color:var(--gold-dark); font-size:17px; font-weight:900; }
+        .lead-person h3 { margin-bottom:3px; }
+        .lead-person p { margin:0; font-size:12px; }
+        .lead-contact { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; }
+        .lead-action { min-height:36px; padding:8px 11px; border:1px solid var(--line); border-radius:7px; background:#fff; color:var(--ink); font-size:12px; font-weight:800; text-decoration:none; }
+        .lead-action:hover { border-color:var(--gold); color:var(--gold-dark); }
+        .lead-action.primary { border-color:var(--gold); background:var(--gold); color:#fff; }
+        .lead-details { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; padding:18px 20px; }
+        .lead-detail span { display:block; margin-bottom:5px; color:var(--muted); font-size:11px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; }
+        .lead-detail strong { display:block; font-size:14px; line-height:1.4; overflow-wrap:anywhere; }
+        .lead-tracking { border-top:1px solid var(--line); background:#fcfcfd; }
+        .lead-tracking summary { padding:12px 20px; color:var(--muted); font-size:12px; font-weight:800; cursor:pointer; }
+        .lead-tracking-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; padding:0 20px 18px; }
+        .empty-leads { padding:54px 24px; text-align:center; }
+        .empty-leads h3 { margin-bottom:8px; }
+        .empty-leads p { max-width:520px; margin:0 auto; }
         .savebar { position:sticky; bottom:0; border-top:1px solid var(--line); background:rgba(255,255,255,.96); padding:14px 26px; display:flex; justify-content:space-between; gap:14px; align-items:center; }
-        @media (max-width:980px) { .shell { grid-template-columns:1fr; } .sidebar { position:static; height:auto; } .nav { grid-template-columns:repeat(2,minmax(0,1fr)); } .grid-2,.grid-3 { grid-template-columns:1fr; } .pair-row { grid-template-columns:1fr; } .topbar,.savebar { position:static; } }
+        body.viewing-leads .savebar, body.viewing-leads [data-save-action] { display:none; }
+        @media (max-width:980px) { .shell { grid-template-columns:1fr; } .sidebar { position:static; height:auto; } .nav { grid-template-columns:repeat(2,minmax(0,1fr)); } .grid-2,.grid-3 { grid-template-columns:1fr; } .pair-row { grid-template-columns:1fr; } .topbar,.savebar { position:static; } .lead-details { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+        @media (max-width:640px) { main { padding:18px 14px; } .section-heading,.lead-card-head { align-items:stretch; flex-direction:column; } .lead-stats { grid-template-columns:1fr; } .lead-stat { display:flex; align-items:center; justify-content:space-between; } .lead-stat strong { margin:0; font-size:24px; } .lead-contact { justify-content:flex-start; } .lead-action { flex:1; text-align:center; } .lead-details,.lead-tracking-grid { grid-template-columns:1fr; } .actions { flex-wrap:wrap; } }
     </style>
 </head>
 <body>
     <form method="post" action="{{ url('/admin') }}" class="shell" enctype="multipart/form-data">
+        <input type="hidden" name="_admin_csrf" value="{{ $adminCsrfToken }}">
         <aside class="sidebar">
             <div class="brand">{{ $settings['brand'] ?? 'Gold Cleaning' }}</div>
             <p>Painel de conteudo do site. Edite os campos e clique em salvar.</p>
             <nav class="nav" aria-label="Navegacao do admin">
                 <button type="button" class="active" data-tab-button="settings">Configuracoes</button>
+                <button type="button" data-tab-button="leads"><span>Leads</span><span class="nav-count">{{ $leadStats['total'] }}</span></button>
                 <button type="button" data-tab-button="pages">Paginas</button>
                 <button type="button" data-tab-button="services">Servicos</button>
                 <button type="button" data-tab-button="areas">Areas</button>
@@ -83,7 +115,8 @@
                 </div>
                 <div class="actions">
                     <a class="btn secondary" href="{{ url('/') }}" target="_blank" rel="noreferrer">Ver site</a>
-                    <button class="btn" type="submit">Salvar alteracoes</button>
+                    <button class="btn secondary logout-btn" type="submit" form="admin-logout-form">Sair</button>
+                    <button class="btn" type="submit" data-save-action>Salvar alteracoes</button>
                 </div>
             </header>
 
@@ -95,6 +128,77 @@
                 @if ($error)
                     <div class="notice error">{{ $error }}</div>
                 @endif
+
+                <section class="section" data-tab="leads">
+                    <div class="section-heading">
+                        <div>
+                            <h2>Leads recebidos</h2>
+                            <p class="subtle">Solicitacoes enviadas pelo formulario do site, das mais recentes para as mais antigas.</p>
+                        </div>
+                        <span class="pill">Horario de Atlanta</span>
+                    </div>
+
+                    <div class="lead-stats">
+                        <div class="lead-stat"><strong>{{ $leadStats['total'] }}</strong><span>Total de leads</span></div>
+                        <div class="lead-stat"><strong>{{ $leadStats['today'] }}</strong><span>Recebidos hoje</span></div>
+                        <div class="lead-stat"><strong>{{ $leadStats['last_seven_days'] }}</strong><span>Ultimos 7 dias</span></div>
+                    </div>
+
+                    @if (empty($leads))
+                        <div class="card empty-leads">
+                            <h3>Nenhum lead recebido ainda</h3>
+                            <p>Assim que alguem enviar o formulario de orcamento, os dados aparecerao aqui automaticamente.</p>
+                        </div>
+                    @else
+                        <div class="lead-list">
+                            @foreach ($leads as $lead)
+                                <article class="card lead-card">
+                                    <header class="lead-card-head">
+                                        <div class="lead-person">
+                                            <span class="lead-avatar">{{ mb_strtoupper(mb_substr($lead['name'] ?? '?', 0, 1)) }}</span>
+                                            <div>
+                                                <h3>{{ $lead['name'] ?? 'Sem nome' }}</h3>
+                                                <p>{{ $lead['created_at_formatted'] }} · Prefere {{ $lead['contact_method_label'] }}</p>
+                                            </div>
+                                        </div>
+                                        <div class="lead-contact">
+                                            @if (!empty($lead['phone_digits']))
+                                                <a class="lead-action" href="tel:+{{ $lead['whatsapp_digits'] }}">Ligar</a>
+                                                <a class="lead-action primary" href="https://wa.me/{{ $lead['whatsapp_digits'] }}" target="_blank" rel="noreferrer">WhatsApp</a>
+                                            @endif
+                                            @if (!empty($lead['email']))
+                                                <a class="lead-action" href="mailto:{{ $lead['email'] }}">E-mail</a>
+                                            @endif
+                                        </div>
+                                    </header>
+
+                                    <div class="lead-details">
+                                        <div class="lead-detail"><span>Telefone</span><strong>{{ $lead['phone'] ?? '-' }}</strong></div>
+                                        <div class="lead-detail"><span>E-mail</span><strong>{{ $lead['email'] ?: '-' }}</strong></div>
+                                        <div class="lead-detail"><span>Servico</span><strong>{{ $lead['cleaning_type'] ?? '-' }}</strong></div>
+                                        <div class="lead-detail"><span>Frequencia</span><strong>{{ $lead['frequency'] ?? '-' }}</strong></div>
+                                        <div class="lead-detail"><span>Quartos</span><strong>{{ $lead['bedrooms'] ?? '-' }}</strong></div>
+                                        <div class="lead-detail"><span>Banheiros</span><strong>{{ $lead['bathrooms'] ?? '-' }}</strong></div>
+                                        <div class="lead-detail"><span>ZIP Code</span><strong>{{ $lead['zip_code'] ?? '-' }}</strong></div>
+                                        <div class="lead-detail"><span>Contato preferido</span><strong>{{ $lead['contact_method_label'] }}</strong></div>
+                                    </div>
+
+                                    <details class="lead-tracking">
+                                        <summary>Ver origem e dados da campanha</summary>
+                                        <div class="lead-tracking-grid">
+                                            <div class="lead-detail"><span>Origem</span><strong>{{ $lead['source'] ?: 'Direto' }}</strong></div>
+                                            <div class="lead-detail"><span>UTM Source</span><strong>{{ $lead['utm_source'] ?: '-' }}</strong></div>
+                                            <div class="lead-detail"><span>UTM Campaign</span><strong>{{ $lead['utm_campaign'] ?: '-' }}</strong></div>
+                                            <div class="lead-detail"><span>UTM Medium</span><strong>{{ $lead['utm_medium'] ?: '-' }}</strong></div>
+                                            <div class="lead-detail"><span>GCLID</span><strong>{{ $lead['gclid'] ?: '-' }}</strong></div>
+                                            <div class="lead-detail"><span>Pagina</span><strong>{{ $lead['page_url'] ?: '-' }}</strong></div>
+                                        </div>
+                                    </details>
+                                </article>
+                            @endforeach
+                        </div>
+                    @endif
+                </section>
 
                 <section class="section active" data-tab="settings">
                     <div class="card">
@@ -316,9 +420,13 @@
 
             <div class="savebar">
                 <p class="subtle">As alteracoes entram no site assim que forem salvas.</p>
-                <button class="btn" type="submit">Salvar alteracoes</button>
+                <button class="btn" type="submit" data-save-action>Salvar alteracoes</button>
             </div>
         </div>
+    </form>
+
+    <form id="admin-logout-form" method="post" action="{{ url('/admin/logout') }}" hidden>
+        <input type="hidden" name="_admin_csrf" value="{{ $adminCsrfToken }}">
     </form>
 
     <script>
@@ -328,6 +436,7 @@
                 document.querySelectorAll("[data-tab]").forEach((section) => section.classList.remove("active"));
                 button.classList.add("active");
                 document.querySelector(`[data-tab="${button.dataset.tabButton}"]`).classList.add("active");
+                document.body.classList.toggle("viewing-leads", button.dataset.tabButton === "leads");
             });
         });
 

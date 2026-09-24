@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Support\SiteContentRepository;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\Cookie;
 
 class SiteController extends Controller
 {
@@ -117,7 +118,11 @@ class SiteController extends Controller
             'description' => 'Gold Cleaning provides residential cleaning in Marietta, GA and nearby Atlanta suburbs. Standard, deep, move-in/move-out, Airbnb, and recurring service.',
         ]);
 
-        return view('site.index', $this->viewData([
+        $existingCsrfToken = (string) request()->cookie('gc_quote_csrf', '');
+        $quoteCsrfToken = preg_match('/^[a-f0-9]{64}$/', $existingCsrfToken)
+            ? $existingCsrfToken
+            : bin2hex(random_bytes(32));
+        $html = view('site.index', $this->viewData([
             'title' => $page['title'],
             'description' => $page['description'],
             'path' => '/',
@@ -126,7 +131,23 @@ class SiteController extends Controller
         ], array_merge(compact('page'), [
             'homeFaq' => $this->homeFaq(),
             'beforeAfter' => $this->beforeAfter(),
-        ])));
+            'quoteCsrfToken' => $quoteCsrfToken,
+        ])))->render();
+
+        $response = new Response($html);
+        $response->headers->setCookie(new Cookie(
+            'gc_quote_csrf',
+            $quoteCsrfToken,
+            time() + 7200,
+            '/',
+            null,
+            request()->isSecure(),
+            true,
+            false,
+            Cookie::SAMESITE_LAX
+        ));
+
+        return $response;
     }
 
     public function services()
@@ -207,42 +228,140 @@ class SiteController extends Controller
 
     public function quoteSubmit(Request $request)
     {
+        $csrfToken = (string) $request->input('csrf_token', '');
+        $csrfCookie = (string) $request->cookie('gc_quote_csrf', '');
+
+        if ($csrfToken === '' || $csrfCookie === '' || !hash_equals($csrfCookie, $csrfToken)) {
+            return $this->quoteError($request, 'Your form session expired. Please refresh the page and try again.', [], 419);
+        }
+
         if (trim((string) $request->input('company_website', '')) !== '') {
-            return redirect(route('site.thank-you'));
+            return $this->quoteSuccess($request);
         }
 
         $lead = [
             'created_at' => date('c'),
-            'name' => trim((string) $request->input('name', '')),
-            'phone' => trim((string) $request->input('phone', '')),
-            'zip' => trim((string) $request->input('zip', '')),
-            'service' => trim((string) $request->input('service', '')),
-            'source' => trim((string) $request->input('source', 'landing_page')),
-            'gclid' => trim((string) $request->input('gclid', '')),
-            'utm_source' => trim((string) $request->input('utm_source', '')),
-            'utm_medium' => trim((string) $request->input('utm_medium', '')),
-            'utm_campaign' => trim((string) $request->input('utm_campaign', '')),
-            'utm_adgroup' => trim((string) $request->input('utm_adgroup', '')),
-            'utm_term' => trim((string) $request->input('utm_term', '')),
-            'page_url' => trim((string) $request->input('page_url', '')),
+            'cleaning_type' => $this->cleanInput($request->input('cleaning_type'), 50),
+            'bedrooms' => $this->cleanInput($request->input('bedrooms'), 10),
+            'bathrooms' => $this->cleanInput($request->input('bathrooms'), 10),
+            'frequency' => $this->cleanInput($request->input('frequency'), 20),
+            'zip_code' => $this->cleanInput($request->input('zip_code'), 10),
+            'name' => $this->cleanInput($request->input('name'), 100),
+            'phone' => $this->cleanInput($request->input('phone'), 25),
+            'email' => strtolower($this->cleanInput($request->input('email'), 150)),
+            'preferred_contact_method' => $this->cleanInput($request->input('preferred_contact_method'), 30),
+            'source' => $this->cleanInput($request->input('source', 'landing_page'), 50),
+            'gclid' => $this->cleanInput($request->input('gclid'), 255),
+            'utm_source' => $this->cleanInput($request->input('utm_source'), 150),
+            'utm_medium' => $this->cleanInput($request->input('utm_medium'), 150),
+            'utm_campaign' => $this->cleanInput($request->input('utm_campaign'), 150),
+            'utm_adgroup' => $this->cleanInput($request->input('utm_adgroup'), 150),
+            'utm_term' => $this->cleanInput($request->input('utm_term'), 150),
+            'utm_content' => $this->cleanInput($request->input('utm_content'), 150),
+            'page_url' => $this->cleanInput($request->input('page_url'), 500),
+            'referrer' => $this->cleanInput($request->input('referrer'), 500),
             'user_agent' => $request->header('User-Agent'),
             'ip' => $request->ip(),
         ];
 
-        if ($lead['name'] === '' || $lead['phone'] === '' || $lead['zip'] === '') {
-            return redirect(route('site.home').'#quote');
+        $errors = $this->validateQuoteLead($lead);
+        if ($errors !== []) {
+            return $this->quoteError($request, 'Please review the highlighted fields and try again.', $errors, 422);
         }
 
         $dir = storage_path('app');
-        if (!is_dir($dir)) {
-            mkdir($dir, 0775, true);
+        if (!is_dir($dir) && !mkdir($dir, 0775, true) && !is_dir($dir)) {
+            return $this->quoteError($request, 'We could not save your request right now. Please try again.', [], 500);
         }
 
-        file_put_contents(
-            $dir.DIRECTORY_SEPARATOR.'quote-leads.jsonl',
+        $leadFile = env('APP_ENV') === 'testing' ? 'quote-leads.testing.jsonl' : 'quote-leads.jsonl';
+        $saved = file_put_contents(
+            $dir.DIRECTORY_SEPARATOR.$leadFile,
             json_encode($lead, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE).PHP_EOL,
             FILE_APPEND | LOCK_EX
         );
+
+        if ($saved === false) {
+            return $this->quoteError($request, 'We could not save your request right now. Please try again.', [], 500);
+        }
+
+        return $this->quoteSuccess($request);
+    }
+
+    private function validateQuoteLead(array $lead): array
+    {
+        $errors = [];
+        $allowedCleaningTypes = ['Standard Cleaning', 'Deep Cleaning', 'Move-In / Move-Out', 'Airbnb Cleaning'];
+        $allowedBedrooms = ['Studio', '1', '2', '3', '4', '5+'];
+        $allowedBathrooms = ['1', '2', '3', '4', '5+'];
+        $allowedFrequencies = ['One Time', 'Weekly', 'Bi-Weekly', 'Monthly'];
+        $allowedContactMethods = ['text_message', 'phone_call', 'whatsapp', 'email'];
+
+        if (!in_array($lead['cleaning_type'], $allowedCleaningTypes, true)) {
+            $errors['cleaning_type'] = 'Choose a cleaning type.';
+        }
+        if (!in_array($lead['bedrooms'], $allowedBedrooms, true)) {
+            $errors['bedrooms'] = 'Choose the number of bedrooms.';
+        }
+        if (!in_array($lead['bathrooms'], $allowedBathrooms, true)) {
+            $errors['bathrooms'] = 'Choose the number of bathrooms.';
+        }
+        if (!in_array($lead['frequency'], $allowedFrequencies, true)) {
+            $errors['frequency'] = 'Choose a cleaning frequency.';
+        }
+        if (!preg_match('/^\d{5}(?:-\d{4})?$/', $lead['zip_code'])) {
+            $errors['zip_code'] = 'Enter a valid 5-digit ZIP Code.';
+        }
+        if (mb_strlen($lead['name']) < 2) {
+            $errors['name'] = 'Enter your name.';
+        }
+
+        $phoneDigits = preg_replace('/\D+/', '', $lead['phone']);
+        if (!preg_match('/^(?:1)?\d{10}$/', $phoneDigits)) {
+            $errors['phone'] = 'Enter a valid US phone number.';
+        }
+        if ($lead['email'] !== '' && !filter_var($lead['email'], FILTER_VALIDATE_EMAIL)) {
+            $errors['email'] = 'Enter a valid email address.';
+        }
+        if (!in_array($lead['preferred_contact_method'], $allowedContactMethods, true)) {
+            $errors['preferred_contact_method'] = 'Choose how you would like us to contact you.';
+        }
+        if ($lead['preferred_contact_method'] === 'email' && $lead['email'] === '') {
+            $errors['email'] = 'Email is required when Email is your preferred contact method.';
+        }
+
+        return $errors;
+    }
+
+    private function cleanInput($value, int $maxLength): string
+    {
+        $value = strip_tags(trim((string) $value));
+        $value = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', $value) ?? '';
+
+        return mb_substr($value, 0, $maxLength);
+    }
+
+    private function quoteError(Request $request, string $message, array $errors, int $status)
+    {
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => $message,
+                'errors' => $errors,
+            ], $status);
+        }
+
+        return redirect(route('site.home').'#quote');
+    }
+
+    private function quoteSuccess(Request $request)
+    {
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'We have received your cleaning request.',
+            ]);
+        }
 
         return redirect(route('site.thank-you').'?lead=quote');
     }

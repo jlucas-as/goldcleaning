@@ -1,16 +1,12 @@
 @extends('site')
 @section('main')
-<section class="lp-hero" id="quote">
+<section class="lp-hero">
     <div class="lp-shell lp-hero-grid">
         <div class="lp-hero-copy">
-            <span class="lp-eyebrow">Residential Cleaning in Marietta, GA</span>
-            <h1>Come Home to a Cleaner, More Comfortable Space</h1>
-            <p>
-                Professional house cleaning for busy homeowners, renters and families in Marietta and nearby Metro Atlanta communities.
-            </p>
-            <p>
-                Choose a one-time cleaning or set up weekly, bi-weekly or monthly service around your schedule.
-            </p>
+            <span class="lp-eyebrow">PROFESSIONAL HOUSE CLEANING IN MARIETTA, GA</span>
+            <h1>A Spotless Home. More Time for What Matters.</h1>
+            <p>Professional house cleaning for busy homeowners, renters and families in Marietta and nearby Metro Atlanta communities.</p>
+            <p>Enjoy a beautifully clean home without the stress. Gold Cleaning provides professional house cleaning in Marietta and surrounding communities, with flexible one-time and recurring services.</p>
             <ul class="lp-checks">
                 <li>Standard, deep and recurring cleaning</li>
                 <li>Houses, apartments and condos</li>
@@ -27,10 +23,18 @@
             <img src="{{ url('public/img/hero-team.png') }}" alt="">
         </div> -->
 
-        <div class="lp-quote-card">
-            <h2>Get a Fast Cleaning Quote</h2>
-            <p>Tell us a little about your home. Our team will contact you to confirm availability and pricing.</p>
-            <form class="lp-short-form" data-lead-form action="{{ route('site.quote-submit') }}" method="post">
+        <div class="lp-quote-card" id="quote" data-quote-card>
+            <div class="lp-form-heading">
+                <div class="lp-form-progress" aria-label="Form progress">
+                    <span data-step-label>Step 1 of 2</span>
+                    <span class="lp-progress-track" aria-hidden="true"><span data-progress-bar></span></span>
+                </div>
+                <h2 data-form-title tabindex="-1">Get Your Free Cleaning Estimate</h2>
+                <p data-form-subtitle>Tell us about your home. It only takes a minute.</p>
+            </div>
+
+            <form class="lp-short-form lp-estimate-form" data-lead-form action="{{ route('site.quote-submit') }}" method="post" novalidate>
+                <input type="hidden" name="csrf_token" value="{{ $quoteCsrfToken }}">
                 <input type="hidden" name="source" value="ads_landing_page">
                 <input type="hidden" name="gclid" data-campaign-field="gclid">
                 <input type="hidden" name="utm_source" data-campaign-field="utm_source">
@@ -38,27 +42,124 @@
                 <input type="hidden" name="utm_campaign" data-campaign-field="utm_campaign">
                 <input type="hidden" name="utm_adgroup" data-campaign-field="utm_adgroup">
                 <input type="hidden" name="utm_term" data-campaign-field="utm_term">
+                <input type="hidden" name="utm_content" data-campaign-field="utm_content">
                 <input type="hidden" name="page_url" data-page-url>
-                <div class="lp-honeypot">
-                    <label>Company website</label>
-                    <input name="company_website" tabindex="-1" autocomplete="off">
+                <input type="hidden" name="referrer" data-referrer>
+
+                <div class="lp-honeypot" aria-hidden="true">
+                    <label for="company-website">Company website</label>
+                    <input id="company-website" name="company_website" tabindex="-1" autocomplete="off">
                 </div>
-                <label>Name <input name="name" placeholder="Your full name" required></label>
-                <label>Phone Number <input name="phone" placeholder="(678) 555-1234" required></label>
-                <label>ZIP Code <input name="zip" placeholder="30060" required></label>
-                <label>Cleaning Service
-                    <select name="service" required>
-                        <option value="">Select a service</option>
-                        <option>Standard Cleaning</option>
-                        <option>Deep Cleaning</option>
-                        <option>Recurring Cleaning</option>
-                        <option>Move-In / Move-Out</option>
-                        <option>Apartment or Condo Cleaning</option>
-                        <option>Not Sure</option>
-                    </select>
-                </label>
-                <button class="btn primary" type="submit" data-track-submit>Check Availability</button>
-                <p class="fine">By submitting this form, you agree to receive calls or text messages regarding your cleaning request.</p>
+
+                <section class="lp-form-step is-active" data-form-step="1" aria-labelledby="cleaning-details-title">
+                    <fieldset class="lp-choice-group" data-required-group="cleaning_type">
+                        <legend id="cleaning-details-title">What type of cleaning do you need?</legend>
+                        <div class="lp-choice-grid lp-choice-grid-services">
+                            @foreach (['Standard Cleaning', 'Deep Cleaning', 'Move-In / Move-Out', 'Airbnb Cleaning'] as $option)
+                                <label class="lp-choice-card">
+                                    <input type="radio" name="cleaning_type" value="{{ $option }}" required>
+                                    <span>{{ $option }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                        <p class="lp-field-error" data-error-for="cleaning_type" role="alert"></p>
+                    </fieldset>
+
+                    <div class="lp-form-row">
+                        <fieldset class="lp-choice-group" data-required-group="bedrooms">
+                            <legend>Bedrooms</legend>
+                            <div class="lp-choice-grid lp-choice-grid-compact">
+                                @foreach (['Studio', '1', '2', '3', '4', '5+'] as $option)
+                                    <label class="lp-choice-card">
+                                        <input type="radio" name="bedrooms" value="{{ $option }}" required>
+                                        <span>{{ $option }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                            <p class="lp-field-error" data-error-for="bedrooms" role="alert"></p>
+                        </fieldset>
+
+                        <fieldset class="lp-choice-group" data-required-group="bathrooms">
+                            <legend>Bathrooms</legend>
+                            <div class="lp-choice-grid lp-choice-grid-compact">
+                                @foreach (['1', '2', '3', '4', '5+'] as $option)
+                                    <label class="lp-choice-card">
+                                        <input type="radio" name="bathrooms" value="{{ $option }}" required>
+                                        <span>{{ $option }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                            <p class="lp-field-error" data-error-for="bathrooms" role="alert"></p>
+                        </fieldset>
+                    </div>
+
+                    <fieldset class="lp-choice-group" data-required-group="frequency">
+                        <legend>How often do you need cleaning?</legend>
+                        <div class="lp-choice-grid">
+                            @foreach (['One Time', 'Weekly', 'Bi-Weekly', 'Monthly'] as $option)
+                                <label class="lp-choice-card">
+                                    <input type="radio" name="frequency" value="{{ $option }}" required>
+                                    <span>{{ $option }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                        <p class="lp-field-error" data-error-for="frequency" role="alert"></p>
+                    </fieldset>
+
+                    <div class="lp-field">
+                        <label for="quote-zip">ZIP Code</label>
+                        <input id="quote-zip" name="zip_code" type="text" inputmode="numeric" autocomplete="postal-code" placeholder="e.g. 30060" minlength="5" maxlength="10" pattern="[0-9]{5}(-[0-9]{4})?" required>
+                        <p class="lp-field-error" data-error-for="zip_code" role="alert"></p>
+                    </div>
+
+                    <button class="btn primary lp-form-primary" type="button" data-form-next>Continue <span aria-hidden="true">&rarr;</span></button>
+                </section>
+
+                <section class="lp-form-step" data-form-step="2" aria-labelledby="contact-details-title" hidden>
+                    <span id="contact-details-title" class="sr-only">Contact details</span>
+                    <div class="lp-field">
+                        <label for="quote-name">Name</label>
+                        <input id="quote-name" name="name" type="text" autocomplete="name" placeholder="Your name" maxlength="100" required>
+                        <p class="lp-field-error" data-error-for="name" role="alert"></p>
+                    </div>
+
+                    <div class="lp-field">
+                        <label for="quote-phone">Phone</label>
+                        <input id="quote-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="Phone number" maxlength="16" required>
+                        <p class="lp-field-error" data-error-for="phone" role="alert"></p>
+                    </div>
+
+                    <div class="lp-field">
+                        <label for="quote-email">Email <span>(optional)</span></label>
+                        <input id="quote-email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="Email address" maxlength="150">
+                        <p class="lp-field-error" data-error-for="email" role="alert"></p>
+                    </div>
+
+                    <fieldset class="lp-choice-group" data-required-group="preferred_contact_method">
+                        <legend>Preferred contact method</legend>
+                        <div class="lp-choice-grid lp-contact-grid">
+                            @foreach ([
+                                'text_message' => 'Text Message',
+                                'phone_call' => 'Phone Call',
+                                'whatsapp' => 'WhatsApp',
+                                'email' => 'Email',
+                            ] as $value => $label)
+                                <label class="lp-choice-card">
+                                    <input type="radio" name="preferred_contact_method" value="{{ $value }}" required>
+                                    <span>{{ $label }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                        <p class="lp-field-error" data-error-for="preferred_contact_method" role="alert"></p>
+                    </fieldset>
+
+                    <div class="lp-submit-error" data-submit-error role="alert" aria-live="polite"></div>
+                    <div class="lp-form-actions">
+                        <button class="btn lp-form-back" type="button" data-form-back><span aria-hidden="true">&larr;</span> Back</button>
+                        <button class="btn primary lp-form-primary" type="submit" data-track-submit>Get My Free Estimate</button>
+                    </div>
+                    <p class="fine">By submitting, you agree to receive calls or messages about your cleaning request. Message and data rates may apply.</p>
+                </section>
             </form>
         </div>
     </div>
@@ -66,31 +167,46 @@
 
 <section class="lp-trust">
     <div class="lp-shell lp-trust-grid">
-        <div><span>Local</span>Local Cleaning Team</div>
-        <div><span>Flex</span>Flexible Scheduling</div>
-        <div><span>Once</span>One-Time or Recurring Service</div>
-        <div><span>Fast</span>Fast and Clear Quotes</div>
+        @foreach ([
+            ['map-pin', 'Local Cleaning Team', 'Your neighbors, not a franchise.'],
+            ['calendar-days', 'Flexible Scheduling', 'Pick the time that works for you.'],
+            ['refresh-cw', 'One-Time or Recurring Cleaning', 'Care that fits your routine.'],
+            ['zap', 'Fast and Clear Quotes', 'No surprises, no hidden fees.'],
+        ] as $benefit)
+            <div class="lp-trust-item">
+                <svg class="lp-line-icon" aria-hidden="true"><use href="{{ url('public/img/lp-icons.svg') }}#{{ $benefit[0] }}"></use></svg>
+                <div>
+                    <strong>{{ $benefit[1] }}</strong>
+                    <span>{{ $benefit[2] }}</span>
+                </div>
+            </div>
+        @endforeach
     </div>
 </section>
 
-<section class="lp-section" id="services">
+<section class="lp-section lp-services-showcase" id="services">
     <div class="lp-shell">
-        <div class="lp-section-head">
+        <div class="lp-section-head lp-showcase-head">
             <h2>Cleaning Services That Fit Your Home and Schedule</h2>
             <p>Whether your home needs dependable routine care or a detailed reset, Gold Cleaning makes it easier to keep your space clean and comfortable.</p>
         </div>
         <div class="lp-service-grid">
             @foreach ([
-                ['Standard Cleaning', 'A practical cleaning service for maintaining kitchens, bathrooms, bedrooms and living spaces.', 'Request Standard Cleaning'],
-                ['Deep Cleaning', 'A more detailed cleaning for homes with buildup, neglected areas or spaces that have not been professionally cleaned recently.', 'Request Deep Cleaning'],
-                ['Recurring Cleaning', 'Keep your home consistently clean with weekly, bi-weekly or monthly visits.', 'Check Recurring Availability'],
-                ['Move-In / Move-Out', 'Prepare an empty home for a new beginning with attention to kitchens, bathrooms, floors and accessible cabinets.', 'Request Move Cleaning'],
+                ['house', 'Standard Cleaning', 'A practical cleaning service for maintaining kitchens, bathrooms, bedrooms and living spaces.', 'Request Standard Cleaning', false],
+                ['sparkles', 'Deep Cleaning', 'A more detailed cleaning for homes with buildup, neglected areas or spaces that have not been professionally cleaned recently.', 'Request Deep Cleaning', false],
+                ['calendar-days', 'Recurring Cleaning', 'Keep your home consistently clean with weekly, bi-weekly or monthly visits.', 'Check Recurring Availability', true],
+                ['truck', 'Move-In / Move-Out', 'Prepare an empty home for a new beginning with attention to kitchens, bathrooms, floors and accessible cabinets.', 'Request Move Cleaning', false],
             ] as $service)
-                <article class="lp-service-card">
-                    <div class="lp-card-icon">{{ substr($service[0], 0, 1) }}</div>
-                    <h3>{{ $service[0] }}</h3>
-                    <p>{{ $service[1] }}</p>
-                    <a href="#quote">{{ $service[2] }}</a>
+                <article class="lp-service-card{{ $service[4] ? ' is-featured' : '' }}">
+                    @if ($service[4])
+                        <span class="lp-popular-badge">Most Popular</span>
+                    @endif
+                    <div class="lp-card-icon">
+                        <svg class="lp-line-icon" aria-hidden="true"><use href="{{ url('public/img/lp-icons.svg') }}#{{ $service[0] }}"></use></svg>
+                    </div>
+                    <h3>{{ $service[1] }}</h3>
+                    <p>{{ $service[2] }}</p>
+                    <a class="btn{{ $service[4] ? ' primary' : '' }}" href="#quote">{{ $service[3] }} <span aria-hidden="true">&rarr;</span></a>
                 </article>
             @endforeach
         </div>
@@ -99,21 +215,26 @@
 
 <section class="lp-included">
     <div class="lp-shell">
-        <div class="lp-section-head">
+        <div class="lp-section-head lp-included-head">
             <h2>What Can Be Included in Your Cleaning?</h2>
             <p>Each quote is customized according to the size, condition and priorities of your home.</p>
         </div>
         <div class="lp-included-grid">
             @foreach ([
-                ['Kitchen', ['Countertops and sinks', 'Exterior of appliances', 'Cabinet exterior', 'Stovetop surfaces', 'Trash removal', 'Vacuuming and mopping']],
-                ['Bathrooms', ['Toilets', 'Sinks and fixtures', 'Mirrors', 'Tubs and showers', 'Bathroom surfaces', 'Floors']],
-                ['Bedrooms & Living Areas', ['Dusting reachable surfaces', 'Furniture surface cleaning', 'Trash removal', 'Vacuuming', 'Mopping accessible floors', 'General room reset']],
-                ['Available Add-Ons', ['Inside oven', 'Inside refrigerator', 'Interior windows', 'Cabinet interiors', 'Laundry or linen changes', 'Additional pet hair cleaning']],
+                ['cooking-pot', 'Kitchen', ['Countertops and sinks', 'Exterior of appliances', 'Cabinet exterior', 'Stovetop surfaces', 'Trash removal', 'Floors and mopping']],
+                ['bath', 'Bathrooms', ['Toilets', 'Sinks and fixtures', 'Mirrors', 'Tubs and showers', 'Bathroom surfaces', 'Floors and mopping']],
+                ['sofa', 'Bedrooms & Living Areas', ['Dusting reachable surfaces', 'Furniture surface cleaning', 'Trash removal', 'Vacuuming', 'Mopping accessible floors', 'Baseboards']],
+                ['settings', 'Available Add-Ons', ['Inside oven', 'Inside refrigerator', 'Interior windows', 'Cabinet interiors', 'Laundry or linen changes', 'Additional room cleaning']],
             ] as $group)
                 <div class="lp-included-card">
-                    <h3>{{ $group[0] }}</h3>
+                    <div class="lp-included-title">
+                        <span class="lp-included-icon">
+                            <svg class="lp-line-icon" aria-hidden="true"><use href="{{ url('public/img/lp-icons.svg') }}#{{ $group[0] }}"></use></svg>
+                        </span>
+                        <h3>{{ $group[1] }}</h3>
+                    </div>
                     <ul>
-                        @foreach ($group[1] as $item)
+                        @foreach ($group[2] as $item)
                             <li>{{ $item }}</li>
                         @endforeach
                     </ul>

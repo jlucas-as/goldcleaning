@@ -5,9 +5,14 @@ namespace App\Http\Controllers;
 use App\Support\SiteContentRepository;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\Cookie;
 
 class AdminController extends Controller
 {
+    private const AUTH_COOKIE = 'gold_admin_auth';
+    private const LOGIN_CSRF_COOKIE = 'gold_admin_login_csrf';
+    private const AUTH_TTL = 28800;
+
     private SiteContentRepository $content;
     private array $pageLabels = [
         'home' => 'Home',
@@ -26,20 +31,25 @@ class AdminController extends Controller
 
     public function edit(Request $request)
     {
-        if ($response = $this->authorizeAdmin()) {
+        if ($response = $this->authorizeAdmin($request)) {
             return $response;
         }
 
         return view('admin.dashboard', array_merge($this->editableContent(), [
             'saved' => $request->query('saved') === '1',
             'error' => null,
+            'adminCsrfToken' => $this->adminCsrfToken($request),
         ]));
     }
 
     public function update(Request $request)
     {
-        if ($response = $this->authorizeAdmin()) {
+        if ($response = $this->authorizeAdmin($request)) {
             return $response;
+        }
+
+        if (!$this->validAdminCsrf($request)) {
+            return redirect('/admin/login?expired=1');
         }
 
         $this->content->save([
@@ -54,9 +64,64 @@ class AdminController extends Controller
         return redirect('/admin?saved=1');
     }
 
+    public function login(Request $request)
+    {
+        if ($this->isAdminAuthenticated($request)) {
+            return redirect('/admin');
+        }
+
+        return $this->loginResponse($request, null, '', 200);
+    }
+
+    public function authenticate(Request $request)
+    {
+        $submittedToken = (string) $request->input('_token', '');
+        $cookieToken = (string) $request->cookie(self::LOGIN_CSRF_COOKIE, '');
+
+        if ($submittedToken === '' || $cookieToken === '' || !hash_equals($cookieToken, $submittedToken)) {
+            return $this->loginResponse($request, 'Sua sessao de login expirou. Tente novamente.', (string) $request->input('username', ''), 419);
+        }
+
+        $configuredUser = (string) env('ADMIN_USERNAME', '');
+        $configuredPassword = (string) env('ADMIN_PASSWORD', '');
+        $username = trim((string) $request->input('username', ''));
+        $password = (string) $request->input('password', '');
+
+        if ($configuredUser === '' || $configuredPassword === '') {
+            return $this->loginResponse($request, 'Configure ADMIN_USERNAME e ADMIN_PASSWORD no arquivo .env.', $username, 503);
+        }
+
+        if (!hash_equals($configuredUser, $username) || !hash_equals($configuredPassword, $password)) {
+            return $this->loginResponse($request, 'Usuario ou senha incorretos.', $username, 422);
+        }
+
+        $expiresAt = time() + self::AUTH_TTL;
+        $response = redirect('/admin');
+        $response->headers->setCookie($this->cookie(self::AUTH_COOKIE, $this->makeAuthToken($configuredUser, $expiresAt), $expiresAt, true));
+        $response->headers->clearCookie(self::LOGIN_CSRF_COOKIE, '/');
+        $response->headers->clearCookie(self::LOGIN_CSRF_COOKIE, '/admin');
+        $response->headers->clearCookie(self::AUTH_COOKIE, '/admin');
+
+        return $response;
+    }
+
+    public function logout(Request $request)
+    {
+        if (!$this->isAdminAuthenticated($request) || !$this->validAdminCsrf($request)) {
+            return redirect('/admin/login?expired=1');
+        }
+
+        $response = redirect('/admin/login?logged_out=1');
+        $response->headers->clearCookie(self::AUTH_COOKIE, '/');
+        $response->headers->clearCookie(self::AUTH_COOKIE, '/admin');
+
+        return $response;
+    }
+
     private function editableContent(): array
     {
         $site = new SiteController();
+        $leadData = $this->leads();
 
         return [
             'settings' => $this->siteSettings($site),
@@ -65,9 +130,84 @@ class AdminController extends Controller
             'services' => $this->siteProperty($site, 'services'),
             'areas' => $this->siteProperty($site, 'areas'),
             'beforeAfter' => $this->beforeAfter(),
+            'leads' => $leadData['items'],
+            'leadStats' => $leadData['stats'],
             'pageLabels' => $this->pageLabels,
             'path' => $this->content->path(),
         ];
+    }
+
+    private function leads(): array
+    {
+        $path = storage_path('app/quote-leads.jsonl');
+        $items = [];
+        $today = 0;
+        $lastSevenDays = 0;
+        $timezone = new \DateTimeZone('America/New_York');
+        $todayStart = new \DateTimeImmutable('today', $timezone);
+        $sevenDaysAgo = $todayStart->modify('-6 days');
+
+        if (is_file($path) && is_readable($path)) {
+            $file = new \SplFileObject($path, 'r');
+
+            while (!$file->eof()) {
+                $line = trim((string) $file->fgets());
+
+                if ($line === '') {
+                    continue;
+                }
+
+                $lead = json_decode($line, true);
+
+                if (!is_array($lead)) {
+                    continue;
+                }
+
+                try {
+                    $createdAt = new \DateTimeImmutable((string) ($lead['created_at'] ?? 'now'));
+                    $createdAt = $createdAt->setTimezone($timezone);
+                } catch (\Exception) {
+                    $createdAt = new \DateTimeImmutable('now', $timezone);
+                }
+
+                if ($createdAt >= $todayStart) {
+                    $today++;
+                }
+
+                if ($createdAt >= $sevenDaysAgo) {
+                    $lastSevenDays++;
+                }
+
+                $phoneDigits = preg_replace('/\D+/', '', (string) ($lead['phone'] ?? '')) ?? '';
+                $lead['created_at_formatted'] = $createdAt->format('m/d/Y, g:i A');
+                $lead['phone_digits'] = $phoneDigits;
+                $lead['whatsapp_digits'] = strlen($phoneDigits) === 10 ? '1'.$phoneDigits : $phoneDigits;
+                $lead['contact_method_label'] = $this->contactMethodLabel((string) ($lead['preferred_contact_method'] ?? ''));
+                $items[] = $lead;
+            }
+        }
+
+        $total = count($items);
+        $items = array_reverse($items);
+
+        return [
+            'items' => array_slice($items, 0, 500),
+            'stats' => [
+                'total' => $total,
+                'today' => $today,
+                'last_seven_days' => $lastSevenDays,
+            ],
+        ];
+    }
+
+    private function contactMethodLabel(string $method): string
+    {
+        return [
+            'text_message' => 'SMS',
+            'phone_call' => 'Ligacao',
+            'whatsapp' => 'WhatsApp',
+            'email' => 'E-mail',
+        ][$method] ?? 'Nao informado';
     }
 
     private function beforeAfter(): array
@@ -347,24 +487,98 @@ class AdminController extends Controller
         return array_values(array_filter(array_map('trim', preg_split('/\R/', $value) ?: []), fn ($item) => $item !== ''));
     }
 
-    private function authorizeAdmin(): ?Response
+    private function authorizeAdmin(Request $request)
     {
-        $username = env('ADMIN_USERNAME');
-        $password = env('ADMIN_PASSWORD');
-
-        if (!$username || !$password) {
-            return new Response('Configure ADMIN_USERNAME e ADMIN_PASSWORD no .env antes de acessar o admin.', 503);
-        }
-
-        $givenUser = $_SERVER['PHP_AUTH_USER'] ?? '';
-        $givenPass = $_SERVER['PHP_AUTH_PW'] ?? '';
-
-        if (hash_equals($username, $givenUser) && hash_equals($password, $givenPass)) {
+        if ($this->isAdminAuthenticated($request)) {
             return null;
         }
 
-        return new Response('Autenticação necessária.', 401, [
-            'WWW-Authenticate' => 'Basic realm="Gold Cleaning Admin"',
-        ]);
+        return redirect('/admin/login');
+    }
+
+    private function loginResponse(Request $request, ?string $error, string $username, int $status)
+    {
+        $token = bin2hex(random_bytes(24));
+        $response = new Response(view('admin.login', [
+            'csrfToken' => $token,
+            'error' => $error,
+            'username' => $username,
+            'loggedOut' => $request->query('logged_out') === '1',
+            'expired' => $request->query('expired') === '1',
+            'credentialsMissing' => !env('ADMIN_USERNAME') || !env('ADMIN_PASSWORD'),
+        ]), $status);
+        $response->headers->setCookie($this->cookie(self::LOGIN_CSRF_COOKIE, $token, time() + 900, true));
+        $response->headers->clearCookie(self::LOGIN_CSRF_COOKIE, '/admin');
+
+        return $response;
+    }
+
+    private function isAdminAuthenticated(Request $request): bool
+    {
+        $token = (string) $request->cookie(self::AUTH_COOKIE, '');
+        $parts = explode('.', $token, 2);
+
+        if (count($parts) !== 2) {
+            return false;
+        }
+
+        [$payload, $signature] = $parts;
+        $expectedSignature = hash_hmac('sha256', $payload, $this->authSecret());
+
+        if (!hash_equals($expectedSignature, $signature)) {
+            return false;
+        }
+
+        $decoded = base64_decode(strtr($payload, '-_', '+/'), true);
+
+        if ($decoded === false) {
+            return false;
+        }
+
+        [$username, $expiresAt] = array_pad(explode('|', $decoded, 2), 2, '');
+
+        return $username !== ''
+            && hash_equals((string) env('ADMIN_USERNAME', ''), $username)
+            && ctype_digit($expiresAt)
+            && (int) $expiresAt >= time();
+    }
+
+    private function makeAuthToken(string $username, int $expiresAt): string
+    {
+        $payload = rtrim(strtr(base64_encode($username.'|'.$expiresAt), '+/', '-_'), '=');
+
+        return $payload.'.'.hash_hmac('sha256', $payload, $this->authSecret());
+    }
+
+    private function authSecret(): string
+    {
+        return hash('sha256', (string) env('APP_KEY', '').'|'.(string) env('ADMIN_PASSWORD', '').'|gold-cleaning-admin');
+    }
+
+    private function adminCsrfToken(Request $request): string
+    {
+        return hash_hmac('sha256', (string) $request->cookie(self::AUTH_COOKIE, ''), $this->authSecret());
+    }
+
+    private function validAdminCsrf(Request $request): bool
+    {
+        $submittedToken = (string) $request->input('_admin_csrf', '');
+
+        return $submittedToken !== '' && hash_equals($this->adminCsrfToken($request), $submittedToken);
+    }
+
+    private function cookie(string $name, string $value, int $expiresAt, bool $httpOnly): Cookie
+    {
+        return new Cookie(
+            $name,
+            $value,
+            $expiresAt,
+            '/',
+            null,
+            request()->isSecure(),
+            $httpOnly,
+            false,
+            Cookie::SAMESITE_LAX
+        );
     }
 }

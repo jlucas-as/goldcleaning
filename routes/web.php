@@ -20,5 +20,8 @@ $router->group(['as' => 'site'], function () use ($router) {
     $router->get('/robots.txt', ['as' => 'robots', 'uses' => 'SiteController@robots']);
 });
 
+$router->get('/admin/login', ['as' => 'admin.login', 'uses' => 'AdminController@login']);
+$router->post('/admin/login', ['as' => 'admin.login.submit', 'uses' => 'AdminController@authenticate']);
+$router->post('/admin/logout', ['as' => 'admin.logout', 'uses' => 'AdminController@logout']);
 $router->get('/admin', ['as' => 'admin.content', 'uses' => 'AdminController@edit']);
 $router->post('/admin', ['as' => 'admin.content.update', 'uses' => 'AdminController@update']);
