@@ -139,7 +139,8 @@ class AdminController extends Controller
 
     private function leads(): array
     {
-        $path = storage_path('app/quote-leads.jsonl');
+        $leadFile = env('APP_ENV') === 'testing' ? 'quote-leads.testing.jsonl' : 'quote-leads.jsonl';
+        $path = storage_path('app/'.$leadFile);
         $items = [];
         $today = 0;
         $lastSevenDays = 0;
@@ -162,6 +163,29 @@ class AdminController extends Controller
                 if (!is_array($lead)) {
                     continue;
                 }
+
+                $lead = array_merge([
+                    'created_at' => '',
+                    'name' => '',
+                    'phone' => '',
+                    'email' => '',
+                    'cleaning_type' => $lead['service'] ?? '',
+                    'frequency' => '',
+                    'bedrooms' => '',
+                    'bathrooms' => '',
+                    'zip_code' => $lead['zip'] ?? '',
+                    'preferred_contact_method' => '',
+                    'source' => '',
+                    'gclid' => '',
+                    'utm_source' => '',
+                    'utm_medium' => '',
+                    'utm_campaign' => '',
+                    'utm_adgroup' => '',
+                    'utm_term' => '',
+                    'utm_content' => '',
+                    'page_url' => '',
+                    'referrer' => '',
+                ], $lead);
 
                 try {
                     $createdAt = new \DateTimeImmutable((string) ($lead['created_at'] ?? 'now'));
