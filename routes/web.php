@@ -25,3 +25,4 @@ $router->post('/admin/login', ['as' => 'admin.login.submit', 'uses' => 'AdminCon
 $router->post('/admin/logout', ['as' => 'admin.logout', 'uses' => 'AdminController@logout']);
 $router->get('/admin', ['as' => 'admin.content', 'uses' => 'AdminController@edit']);
 $router->post('/admin', ['as' => 'admin.content.update', 'uses' => 'AdminController@update']);
+$router->post('/admin/leads/delete', ['as' => 'admin.leads.delete', 'uses' => 'AdminController@deleteLead']);

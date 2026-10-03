@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Support\SiteContentRepository;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Symfony\Component\HttpFoundation\Cookie;
 
 class SiteController extends Controller
 {
@@ -118,11 +117,7 @@ class SiteController extends Controller
             'description' => 'Gold Cleaning provides residential cleaning in Marietta, GA and nearby Atlanta suburbs. Standard, deep, move-in/move-out, Airbnb, and recurring service.',
         ]);
 
-        $existingCsrfToken = (string) request()->cookie('gc_quote_csrf', '');
-        $quoteCsrfToken = preg_match('/^[a-f0-9]{64}$/', $existingCsrfToken)
-            ? $existingCsrfToken
-            : bin2hex(random_bytes(32));
-        $html = view('site.index', $this->viewData([
+        return view('site.index', $this->viewData([
             'title' => $page['title'],
             'description' => $page['description'],
             'path' => '/',
@@ -131,23 +126,7 @@ class SiteController extends Controller
         ], array_merge(compact('page'), [
             'homeFaq' => $this->homeFaq(),
             'beforeAfter' => $this->beforeAfter(),
-            'quoteCsrfToken' => $quoteCsrfToken,
-        ])))->render();
-
-        $response = new Response($html);
-        $response->headers->setCookie(new Cookie(
-            'gc_quote_csrf',
-            $quoteCsrfToken,
-            time() + 7200,
-            '/',
-            null,
-            request()->isSecure(),
-            true,
-            false,
-            Cookie::SAMESITE_LAX
-        ));
-
-        return $response;
+        ])));
     }
 
     public function services()
@@ -487,6 +466,7 @@ class SiteController extends Controller
             'areas' => $this->areas,
             'baseUrl' => $this->baseUrl,
             'settings' => $settings,
+            'quoteCsrfToken' => (string) request()->attributes->get('quote_csrf_token', ''),
         ], $meta, $extra);
     }
 

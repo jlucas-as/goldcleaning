@@ -64,7 +64,15 @@ function mobileMenu() {
   if (!burger || !menu) return;
 
   burger.addEventListener("click", () => {
-    menu.classList.toggle("mobile-open");
+    const isOpen = menu.classList.toggle("mobile-open");
+    burger.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  });
+
+  menu.querySelectorAll("a").forEach((link) => {
+    link.addEventListener("click", () => {
+      menu.classList.remove("mobile-open");
+      burger.setAttribute("aria-expanded", "false");
+    });
   });
 }
 

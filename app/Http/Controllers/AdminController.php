@@ -37,8 +37,11 @@ class AdminController extends Controller
 
         return view('admin.dashboard', array_merge($this->editableContent(), [
             'saved' => $request->query('saved') === '1',
+            'leadDeleted' => $request->query('lead_deleted') === '1',
+            'leadDeleteError' => $request->query('lead_delete_error') === '1',
             'error' => null,
             'adminCsrfToken' => $this->adminCsrfToken($request),
+            'activeTab' => $request->query('tab') === 'leads' ? 'leads' : 'settings',
         ]));
     }
 
@@ -118,6 +121,25 @@ class AdminController extends Controller
         return $response;
     }
 
+    public function deleteLead(Request $request)
+    {
+        if ($response = $this->authorizeAdmin($request)) {
+            return $response;
+        }
+
+        if (!$this->validAdminCsrf($request)) {
+            return redirect('/admin/login?expired=1');
+        }
+
+        $leadId = strtolower(trim((string) $request->input('lead_id', '')));
+
+        if (!preg_match('/^[a-f0-9]{64}$/', $leadId) || !$this->deleteLeadRecord($leadId)) {
+            return redirect('/admin?tab=leads&lead_delete_error=1');
+        }
+
+        return redirect('/admin?tab=leads&lead_deleted=1');
+    }
+
     private function editableContent(): array
     {
         $site = new SiteController();
@@ -139,8 +161,7 @@ class AdminController extends Controller
 
     private function leads(): array
     {
-        $leadFile = env('APP_ENV') === 'testing' ? 'quote-leads.testing.jsonl' : 'quote-leads.jsonl';
-        $path = storage_path('app/'.$leadFile);
+        $path = $this->leadFilePath();
         $items = [];
         $today = 0;
         $lastSevenDays = 0;
@@ -150,9 +171,12 @@ class AdminController extends Controller
 
         if (is_file($path) && is_readable($path)) {
             $file = new \SplFileObject($path, 'r');
+            $lineNumber = -1;
 
             while (!$file->eof()) {
-                $line = trim((string) $file->fgets());
+                $lineNumber++;
+                $rawLine = (string) $file->fgets();
+                $line = trim($rawLine);
 
                 if ($line === '') {
                     continue;
@@ -207,6 +231,7 @@ class AdminController extends Controller
                 $lead['phone_digits'] = $phoneDigits;
                 $lead['whatsapp_digits'] = strlen($phoneDigits) === 10 ? '1'.$phoneDigits : $phoneDigits;
                 $lead['contact_method_label'] = $this->contactMethodLabel((string) ($lead['preferred_contact_method'] ?? ''));
+                $lead['lead_id'] = $this->leadRecordId($lineNumber, $rawLine);
                 $items[] = $lead;
             }
         }
@@ -222,6 +247,65 @@ class AdminController extends Controller
                 'last_seven_days' => $lastSevenDays,
             ],
         ];
+    }
+
+    private function deleteLeadRecord(string $leadId): bool
+    {
+        $path = $this->leadFilePath();
+
+        if (!is_file($path)) {
+            return false;
+        }
+
+        $handle = fopen($path, 'c+');
+
+        if ($handle === false || !flock($handle, LOCK_EX)) {
+            if (is_resource($handle)) {
+                fclose($handle);
+            }
+            return false;
+        }
+
+        $remainingLines = [];
+        $deleted = false;
+        $lineNumber = 0;
+        rewind($handle);
+
+        while (($rawLine = fgets($handle)) !== false) {
+            if (!$deleted && hash_equals($this->leadRecordId($lineNumber, $rawLine), $leadId)) {
+                $deleted = true;
+            } else {
+                $remainingLines[] = $rawLine;
+            }
+
+            $lineNumber++;
+        }
+
+        if ($deleted) {
+            rewind($handle);
+            ftruncate($handle, 0);
+            foreach ($remainingLines as $line) {
+                fwrite($handle, $line);
+            }
+            fflush($handle);
+        }
+
+        flock($handle, LOCK_UN);
+        fclose($handle);
+
+        return $deleted;
+    }
+
+    private function leadRecordId(int $lineNumber, string $rawLine): string
+    {
+        return hash_hmac('sha256', $lineNumber.'|'.hash('sha256', $rawLine), $this->authSecret());
+    }
+
+    private function leadFilePath(): string
+    {
+        $leadFile = env('APP_ENV') === 'testing' ? 'quote-leads.testing.jsonl' : 'quote-leads.jsonl';
+
+        return storage_path('app/'.$leadFile);
     }
 
     private function contactMethodLabel(string $method): string
@@ -286,7 +370,7 @@ class AdminController extends Controller
                 'description' => 'Request a fast cleaning quote from Gold Cleaning for homes, apartments, move-outs, deep cleans, recurring service, and Airbnb turnovers near Marietta, GA.',
                 'hero_pill' => 'Fast local quote',
                 'hero_h1' => 'Request a house cleaning quote in Marietta, GA.',
-                'hero_lead' => 'Tell us what you need, where the home is located, and how you prefer to be contacted. If there is no backend configured, this form opens WhatsApp or SMS with your details already prepared.',
+                'hero_lead' => 'Tell us what you need, where the home is located, and how you prefer to be contacted. Submit the form and our team will follow up with availability and your personalized estimate.',
             ],
             'contact' => [
                 'title' => 'Contact Gold Cleaning in Marietta, GA',

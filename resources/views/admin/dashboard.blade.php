@@ -72,9 +72,11 @@
         .lead-person h3 { margin-bottom:3px; }
         .lead-person p { margin:0; font-size:12px; }
         .lead-contact { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; }
-        .lead-action { min-height:36px; padding:8px 11px; border:1px solid var(--line); border-radius:7px; background:#fff; color:var(--ink); font-size:12px; font-weight:800; text-decoration:none; }
+        .lead-action { appearance:none; min-height:36px; padding:8px 11px; border:1px solid var(--line); border-radius:7px; background:#fff; color:var(--ink); font:inherit; font-size:12px; font-weight:800; text-decoration:none; cursor:pointer; }
         .lead-action:hover { border-color:var(--gold); color:var(--gold-dark); }
         .lead-action.primary { border-color:var(--gold); background:var(--gold); color:#fff; }
+        .lead-action.danger { border-color:#fda29b; color:#b42318; }
+        .lead-action.danger:hover { border-color:#b42318; background:#fef3f2; color:#912018; }
         .lead-details { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; padding:18px 20px; }
         .lead-detail span { display:block; margin-bottom:5px; color:var(--muted); font-size:11px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; }
         .lead-detail strong { display:block; font-size:14px; line-height:1.4; overflow-wrap:anywhere; }
@@ -90,15 +92,15 @@
         @media (max-width:640px) { main { padding:18px 14px; } .section-heading,.lead-card-head { align-items:stretch; flex-direction:column; } .lead-stats { grid-template-columns:1fr; } .lead-stat { display:flex; align-items:center; justify-content:space-between; } .lead-stat strong { margin:0; font-size:24px; } .lead-contact { justify-content:flex-start; } .lead-action { flex:1; text-align:center; } .lead-details,.lead-tracking-grid { grid-template-columns:1fr; } .actions { flex-wrap:wrap; } }
     </style>
 </head>
-<body>
+<body @class(['viewing-leads' => ($activeTab ?? 'settings') === 'leads'])>
     <form method="post" action="{{ url('/admin') }}" class="shell" enctype="multipart/form-data">
         <input type="hidden" name="_admin_csrf" value="{{ $adminCsrfToken }}">
         <aside class="sidebar">
             <div class="brand">{{ $settings['brand'] ?? 'Gold Cleaning' }}</div>
             <p>Painel de conteudo do site. Edite os campos e clique em salvar.</p>
             <nav class="nav" aria-label="Navegacao do admin">
-                <button type="button" class="active" data-tab-button="settings">Configuracoes</button>
-                <button type="button" data-tab-button="leads"><span>Leads</span><span class="nav-count">{{ $leadStats['total'] }}</span></button>
+                <button type="button" @class(['active' => ($activeTab ?? 'settings') === 'settings']) data-tab-button="settings">Configuracoes</button>
+                <button type="button" @class(['active' => ($activeTab ?? 'settings') === 'leads']) data-tab-button="leads"><span>Leads</span><span class="nav-count">{{ $leadStats['total'] }}</span></button>
                 <button type="button" data-tab-button="pages">Paginas</button>
                 <button type="button" data-tab-button="services">Servicos</button>
                 <button type="button" data-tab-button="areas">Areas</button>
@@ -129,7 +131,15 @@
                     <div class="notice error">{{ $error }}</div>
                 @endif
 
-                <section class="section" data-tab="leads">
+                @if ($leadDeleted ?? false)
+                    <div class="notice success">Lead excluido com sucesso.</div>
+                @endif
+
+                @if ($leadDeleteError ?? false)
+                    <div class="notice error">Nao foi possivel excluir esse lead. Atualize a pagina e tente novamente.</div>
+                @endif
+
+                <section @class(['section', 'active' => ($activeTab ?? 'settings') === 'leads']) data-tab="leads">
                     <div class="section-heading">
                         <div>
                             <h2>Leads recebidos</h2>
@@ -169,6 +179,16 @@
                                             @if (!empty($lead['email']))
                                                 <a class="lead-action" href="mailto:{{ $lead['email'] }}">E-mail</a>
                                             @endif
+                                            <button
+                                                class="lead-action danger"
+                                                type="submit"
+                                                name="lead_id"
+                                                value="{{ $lead['lead_id'] }}"
+                                                formaction="{{ url('/admin/leads/delete') }}"
+                                                formmethod="post"
+                                                data-delete-lead
+                                                data-lead-name="{{ $lead['name'] ?? 'este lead' }}"
+                                            >Excluir</button>
                                         </div>
                                     </header>
 
@@ -200,7 +220,7 @@
                     @endif
                 </section>
 
-                <section class="section active" data-tab="settings">
+                <section @class(['section', 'active' => ($activeTab ?? 'settings') === 'settings']) data-tab="settings">
                     <div class="card">
                         <h2>Configuracoes globais</h2>
                         <div class="grid grid-3">
@@ -441,8 +461,17 @@
         });
 
         document.addEventListener("click", (event) => {
+            const deleteLeadButton = event.target.closest("[data-delete-lead]");
             const addButton = event.target.closest("[data-add-row]");
             const removeButton = event.target.closest("[data-remove-row]");
+
+            if (deleteLeadButton) {
+                const leadName = deleteLeadButton.dataset.leadName || "este lead";
+                if (!window.confirm(`Excluir permanentemente o registro de ${leadName}?`)) {
+                    event.preventDefault();
+                }
+                return;
+            }
 
             if (removeButton) {
                 const row = removeButton.closest(".pair-row") || removeButton.closest(".media-item");

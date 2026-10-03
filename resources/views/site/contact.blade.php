@@ -13,7 +13,7 @@
                 <a class="contact-chip" data-email-link href="mailto:{{ $settings['email'] }}">{{ $settings['email'] }}</a>
             </div>
         </div>
-        <div class="card quote-card"><div class="pad"><div style="font-weight:900;font-size:22px">Send cleaning details</div>@include('site.partials.quote-form', ['id' => 'contact'])</div></div>
+        @include('site.partials.quote-form', ['id' => 'contact', 'source' => 'contact_page'])
     </div>
 </section>
 

@@ -12,13 +12,7 @@
             </div>
             <div class="area-highlights"><span>Cobb County core coverage</span><span>North metro Atlanta routes</span><span>Quote by city or ZIP code</span></div>
         </div>
-        <div class="card">
-            <div class="pad">
-                <div style="font-weight:900;font-size:22px">Check Your Area</div>
-                <p class="sub" style="margin-top:6px">Send your city or ZIP code and we will confirm coverage, scheduling, and quote options.</p>
-                @include('site.partials.quote-form', ['id' => 'areas'])
-            </div>
-        </div>
+        @include('site.partials.quote-form', ['id' => 'areas', 'source' => 'service_areas'])
     </div>
 </section>
 

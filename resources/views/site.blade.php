@@ -26,7 +26,7 @@
     <meta name="twitter:description" content="{{ $meta['description'] }}" />
     <meta name="twitter:image" content="{{ $meta['image'] }}" />
     <link rel="icon" type="image/png" href="{{ url('public/img/favicon.png') }}" />
-    <link rel="stylesheet" href="{{ url('public/css/styles.css') }}?v=34" />
+    <link rel="stylesheet" href="{{ url('public/css/styles.css') }}?v=36" />
     @if (!empty($settings['google_analytics_id']))
         <script async src="https://www.googletagmanager.com/gtag/js?id={{ $settings['google_analytics_id'] }}"></script>
         <script>
@@ -52,36 +52,11 @@
     @endforeach
 </head>
 
-<body class="{{ !empty($meta['landing']) ? 'landing-page' : '' }}">
+<body class="landing-page">
     <!-- Google Tag Manager (noscript) -->
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WS4RL6LD"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
-    
-    <header class="nav" style="display:none">
-        <div class="nav-inner">
-            <a class="brand" href="{{ route('site.home') }}" aria-label="Gold Cleaning home">
-                <img src="{{ url('public/img/logo.png') }}" alt="Gold Cleaning logo" class="logo-img" width="220" height="52">
-            </a>
-
-            <nav class="menu" data-menu aria-label="Main navigation">
-                <a href="{{ route('site.home') }}">Home</a>
-                <a href="{{ route('site.services') }}">Services</a>
-                <a href="{{ route('site.service-areas') }}">Service Areas</a>
-                <a href="{{ route('site.quote') }}">Quote</a>
-                <a href="{{ route('site.how-it-works') }}">How It Works</a>
-                <a href="{{ route('site.home') }}#reviews">Reviews</a>
-                <a href="{{ route('site.faq') }}">FAQ</a>
-                <a href="{{ route('site.contact') }}">Contact</a>
-            </nav>
-
-            <div class="actions">
-                <a class="btn" data-phone-tel href="tel:{{ $settings['phone_tel'] }}">Call</a>
-                <a class="btn primary" data-wa-quote href="#" target="_blank" rel="noreferrer">Get a Quote</a>
-                <button class="btn burger" type="button" data-burger aria-label="Open menu">Menu</button>
-            </div>
-        </div>
-    </header>
     
     <header class="lp-header">
         <div class="lp-topbar">
@@ -101,11 +76,14 @@
                 <a href="{{ route('site.faq') }}">FAQ</a>
                 <a href="{{ route('site.contact') }}">Contact</a>
             </nav>
-            <a class="btn primary lp-call-top" data-track-call data-phone-tel href="tel:{{ $settings['phone_tel'] }}">Call {{ $settings['phone_display'] }}</a>
+            <div class="lp-nav-actions">
+                <a class="btn primary lp-call-top" data-track-call data-phone-tel href="tel:{{ $settings['phone_tel'] }}">Call {{ $settings['phone_display'] }}</a>
+                <button class="btn burger lp-menu-button" type="button" data-burger aria-label="Open navigation menu" aria-expanded="false">Menu</button>
+            </div>
         </div>
     </header>
 
-    <main class="{{ !empty($meta['landing']) ? 'lp-main' : 'container' }}">
+    <main class="lp-main {{ ($meta['path'] ?? '/') === '/' ? '' : 'site-main' }}">
         @if (!empty($breadcrumbs))
             <nav class="breadcrumbs" aria-label="Breadcrumb">
                 <a href="{{ route('site.home') }}">Home</a>
@@ -119,7 +97,7 @@
         @yield('main')
     </main>
 
-    <footer class="footer {{ !empty($meta['landing']) ? 'lp-footer' : '' }}">
+    <footer class="footer lp-footer">
         <div class="container">
             <div class="footer-grid">
                 <div>
@@ -176,15 +154,13 @@
             'email' => $settings['email'],
         ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!};
     </script>
-    @if (!empty($meta['landing']))
-        <div class="lp-mobile-bar" aria-label="Quick contact actions">
-            <a data-track-call data-phone-tel href="tel:{{ $settings['phone_tel'] }}">Call</a>
-            <a data-track-sms href="sms:{{ $settings['phone_digits'] }}">Text</a>
-            <a href="#quote">Get Quote</a>
-        </div>
-    @endif
+    <div class="lp-mobile-bar" aria-label="Quick contact actions">
+        <a data-track-call data-phone-tel href="tel:{{ $settings['phone_tel'] }}">Call</a>
+        <a data-track-sms href="sms:{{ $settings['phone_digits'] }}">Text</a>
+        <a href="{{ route('site.home') }}#quote">Get Quote</a>
+    </div>
 
-    <script src="{{ url('public/js/app.js') }}?v=32"></script>
+    <script src="{{ url('public/js/app.js') }}?v=33"></script>
 </body>
 
 </html>

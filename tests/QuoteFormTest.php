@@ -36,6 +36,21 @@ class QuoteFormTest extends TestCase
         $this->assertNotEmpty($this->response->headers->getCookies());
     }
 
+    public function test_internal_quote_forms_use_the_home_form_and_csrf_cookie(): void
+    {
+        foreach (['/quote', '/contact', '/service-areas', '/service-areas/marietta-ga', '/services/deep-cleaning'] as $path) {
+            $this->get($path);
+
+            $this->assertResponseOk();
+            $html = $this->response->getContent();
+            $this->assertStringContainsString('class="lp-short-form lp-estimate-form"', $html, $path);
+            $this->assertStringContainsString('action="'.route('site.quote-submit').'"', $html, $path);
+            $this->assertStringContainsString('Step 1 of 2', $html, $path);
+            $this->assertStringNotContainsString('data-quote-form', $html, $path);
+            $this->assertNotEmpty($this->response->headers->getCookies(), $path);
+        }
+    }
+
     public function test_quote_submission_requires_matching_csrf_token(): void
     {
         $this->json('POST', '/quote-submit', $this->validLead());
