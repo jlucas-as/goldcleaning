@@ -279,6 +279,7 @@ class SiteController extends Controller
         $recipient = (string) env('LEAD_NOTIFICATION_EMAIL', 'contact@goldcleaning.net');
         $smtpHost = trim((string) env('SMTP_HOST', ''));
         $smtpPort = (int) env('SMTP_PORT', 587);
+        $smtpTimeout = (int) env('SMTP_TIMEOUT', 10);
         $smtpUsername = trim((string) env('SMTP_USERNAME', ''));
         $smtpPassword = (string) env('SMTP_PASSWORD', '');
         $smtpEncryption = strtolower(trim((string) env('SMTP_ENCRYPTION', 'tls')));
@@ -297,6 +298,8 @@ class SiteController extends Controller
             || !filter_var($fromEmail, FILTER_VALIDATE_EMAIL)
             || $smtpPort < 1
             || $smtpPort > 65535
+            || $smtpTimeout < 1
+            || $smtpTimeout > 60
         ) {
             error_log('[Gold Cleaning] Lead saved, but the SMTP configuration is incomplete or invalid.');
             return;
@@ -314,6 +317,8 @@ class SiteController extends Controller
             $mailer->isSMTP();
             $mailer->Host = $smtpHost;
             $mailer->Port = $smtpPort;
+            $mailer->Timeout = $smtpTimeout;
+            $mailer->Timelimit = $smtpTimeout;
             $mailer->SMTPAuth = true;
             $mailer->Username = $smtpUsername;
             $mailer->Password = $smtpPassword;
