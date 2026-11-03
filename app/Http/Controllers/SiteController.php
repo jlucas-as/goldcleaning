@@ -264,7 +264,78 @@ class SiteController extends Controller
             return $this->quoteError($request, 'We could not save your request right now. Please try again.', [], 500);
         }
 
+        $this->sendLeadNotification($lead);
+
         return $this->quoteSuccess($request);
+    }
+
+    private function sendLeadNotification(array $lead): void
+    {
+        if (env('APP_ENV') === 'testing') {
+            return;
+        }
+
+        $recipient = (string) env('LEAD_NOTIFICATION_EMAIL', 'contact@goldcleaning.net');
+
+        if (!filter_var($recipient, FILTER_VALIDATE_EMAIL)) {
+            error_log('[Gold Cleaning] Invalid lead notification email address.');
+            return;
+        }
+
+        $subjectName = preg_replace('/[\r\n]+/', ' ', (string) ($lead['name'] ?? 'New lead')) ?: 'New lead';
+        $subject = 'New cleaning quote - '.$subjectName;
+        $message = $this->leadNotificationMessage($lead);
+        $replyTo = filter_var($lead['email'] ?? '', FILTER_VALIDATE_EMAIL)
+            ? (string) $lead['email']
+            : $recipient;
+        $headers = implode("\r\n", [
+            'MIME-Version: 1.0',
+            'Content-Type: text/plain; charset=UTF-8',
+            'From: Gold Cleaning Website <noreply@goldcleaning.net>',
+            'Reply-To: '.$replyTo,
+            'X-Mailer: PHP/'.PHP_VERSION,
+        ]);
+
+        $sent = @mail($recipient, $subject, $message, $headers);
+
+        if (!$sent) {
+            error_log('[Gold Cleaning] Lead saved, but email notification could not be sent to '.$recipient.'.');
+        }
+    }
+
+    private function leadNotificationMessage(array $lead): string
+    {
+        $contactMethods = [
+            'text_message' => 'Text Message',
+            'phone_call' => 'Phone Call',
+            'whatsapp' => 'WhatsApp',
+            'email' => 'Email',
+        ];
+
+        $fields = [
+            'Name' => $lead['name'] ?? '',
+            'Phone' => $lead['phone'] ?? '',
+            'Email' => $lead['email'] ?? '',
+            'Preferred contact' => $contactMethods[$lead['preferred_contact_method'] ?? ''] ?? ($lead['preferred_contact_method'] ?? ''),
+            'Cleaning type' => $lead['cleaning_type'] ?? '',
+            'Frequency' => $lead['frequency'] ?? '',
+            'Bedrooms' => $lead['bedrooms'] ?? '',
+            'Bathrooms' => $lead['bathrooms'] ?? '',
+            'ZIP Code' => $lead['zip_code'] ?? '',
+            'Source' => $lead['source'] ?? '',
+            'UTM source' => $lead['utm_source'] ?? '',
+            'UTM campaign' => $lead['utm_campaign'] ?? '',
+            'Page' => $lead['page_url'] ?? '',
+            'Submitted at' => $lead['created_at'] ?? '',
+        ];
+        $lines = ['A new cleaning estimate request was submitted.', ''];
+
+        foreach ($fields as $label => $value) {
+            $value = trim((string) $value);
+            $lines[] = $label.': '.($value !== '' ? $value : '-');
+        }
+
+        return implode("\r\n", $lines);
     }
 
     private function validateQuoteLead(array $lead): array

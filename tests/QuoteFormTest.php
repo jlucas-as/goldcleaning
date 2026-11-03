@@ -2,6 +2,8 @@
 
 namespace Tests;
 
+use App\Http\Controllers\SiteController;
+
 class QuoteFormTest extends TestCase
 {
     private string $leadFile;
@@ -122,6 +124,36 @@ class QuoteFormTest extends TestCase
         $this->assertResponseOk();
         $this->seeJsonContains(['success' => true]);
         $this->assertFileDoesNotExist($this->leadFile);
+    }
+
+    public function test_email_notification_contains_the_lead_details(): void
+    {
+        $controller = new SiteController();
+        $method = new \ReflectionMethod($controller, 'leadNotificationMessage');
+        $method->setAccessible(true);
+        $message = $method->invoke($controller, [
+            'name' => 'Test Customer',
+            'phone' => '(678) 555-1234',
+            'email' => 'test@example.com',
+            'preferred_contact_method' => 'email',
+            'cleaning_type' => 'Deep Cleaning',
+            'frequency' => 'Bi-Weekly',
+            'bedrooms' => '3',
+            'bathrooms' => '2',
+            'zip_code' => '30060',
+            'source' => 'quote_page',
+            'utm_source' => 'google',
+            'utm_campaign' => 'marietta_cleaning',
+            'page_url' => 'https://goldcleaning.net/quote',
+            'created_at' => '2026-11-02T12:00:00+00:00',
+        ]);
+
+        $this->assertStringContainsString('Name: Test Customer', $message);
+        $this->assertStringContainsString('Phone: (678) 555-1234', $message);
+        $this->assertStringContainsString('Email: test@example.com', $message);
+        $this->assertStringContainsString('Cleaning type: Deep Cleaning', $message);
+        $this->assertStringContainsString('ZIP Code: 30060', $message);
+        $this->assertStringContainsString('UTM campaign: marietta_cleaning', $message);
     }
 
     private function formSession(): array
