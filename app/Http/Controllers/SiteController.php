@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Support\SiteContentRepository;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use PHPMailer\PHPMailer\PHPMailer;
 
 class SiteController extends Controller
 {
@@ -276,9 +277,28 @@ class SiteController extends Controller
         }
 
         $recipient = (string) env('LEAD_NOTIFICATION_EMAIL', 'contact@goldcleaning.net');
+        $smtpHost = trim((string) env('SMTP_HOST', ''));
+        $smtpPort = (int) env('SMTP_PORT', 587);
+        $smtpUsername = trim((string) env('SMTP_USERNAME', ''));
+        $smtpPassword = (string) env('SMTP_PASSWORD', '');
+        $smtpEncryption = strtolower(trim((string) env('SMTP_ENCRYPTION', 'tls')));
+        $fromEmail = trim((string) env('SMTP_FROM_EMAIL', $smtpUsername));
+        $fromName = trim((string) env('SMTP_FROM_NAME', 'Gold Cleaning Website'));
 
         if (!filter_var($recipient, FILTER_VALIDATE_EMAIL)) {
             error_log('[Gold Cleaning] Invalid lead notification email address.');
+            return;
+        }
+
+        if (
+            $smtpHost === ''
+            || $smtpUsername === ''
+            || $smtpPassword === ''
+            || !filter_var($fromEmail, FILTER_VALIDATE_EMAIL)
+            || $smtpPort < 1
+            || $smtpPort > 65535
+        ) {
+            error_log('[Gold Cleaning] Lead saved, but the SMTP configuration is incomplete or invalid.');
             return;
         }
 
@@ -288,18 +308,38 @@ class SiteController extends Controller
         $replyTo = filter_var($lead['email'] ?? '', FILTER_VALIDATE_EMAIL)
             ? (string) $lead['email']
             : $recipient;
-        $headers = implode("\r\n", [
-            'MIME-Version: 1.0',
-            'Content-Type: text/plain; charset=UTF-8',
-            'From: Gold Cleaning Website <noreply@goldcleaning.net>',
-            'Reply-To: '.$replyTo,
-            'X-Mailer: PHP/'.PHP_VERSION,
-        ]);
 
-        $sent = @mail($recipient, $subject, $message, $headers);
+        try {
+            $mailer = new PHPMailer(true);
+            $mailer->isSMTP();
+            $mailer->Host = $smtpHost;
+            $mailer->Port = $smtpPort;
+            $mailer->SMTPAuth = true;
+            $mailer->Username = $smtpUsername;
+            $mailer->Password = $smtpPassword;
+            $mailer->CharSet = PHPMailer::CHARSET_UTF8;
 
-        if (!$sent) {
-            error_log('[Gold Cleaning] Lead saved, but email notification could not be sent to '.$recipient.'.');
+            if (in_array($smtpEncryption, ['ssl', 'smtps'], true)) {
+                $mailer->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+            } elseif ($smtpEncryption === 'tls') {
+                $mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            } elseif (in_array($smtpEncryption, ['', 'none'], true)) {
+                $mailer->SMTPSecure = '';
+                $mailer->SMTPAutoTLS = false;
+            } else {
+                error_log('[Gold Cleaning] Lead saved, but SMTP_ENCRYPTION is invalid.');
+                return;
+            }
+
+            $mailer->setFrom($fromEmail, $fromName !== '' ? $fromName : 'Gold Cleaning Website');
+            $mailer->addAddress($recipient);
+            $mailer->addReplyTo($replyTo);
+            $mailer->Subject = $subject;
+            $mailer->Body = $message;
+            $mailer->isHTML(false);
+            $mailer->send();
+        } catch (\Throwable $exception) {
+            error_log('[Gold Cleaning] Lead saved, but the SMTP notification failed: '.$exception->getMessage());
         }
     }
 
